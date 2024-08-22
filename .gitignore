@@ -44,6 +44,7 @@
 *.opensdf
 *.sdf
 *.db
+*.dll
 
 # Visual Studio profiler
 *.psess
@@ -75,6 +76,7 @@ Desktop.ini
 # Visual Studio files
 ipch/
 .vs/
+**/vcpkg_installed/*
 
 # VS Code files
 .vscode/
