@@ -11,8 +11,13 @@
  */
 
 #include <ph.h>
-#include <apiimport.h>
 #include <mapldr.h>
+// Delay imports
+#include <sddl.h>
+#include <shlwapi.h>
+#include <userenv.h>
+// Must always be last
+#include <apiimport.h>
 
 /**
  * Imports a procedure from a specified module.
@@ -69,13 +74,13 @@ PVOID PhpImportProcedure(
  * @param Name The name of the procedure.
  */
 #define PH_DEFINE_IMPORT(Module, Name) \
-_##Name Name##_Import(VOID) \
+typeof(&(Name)) Name##_Import(VOID) \
 { \
     static PH_INITONCE initOnce = PH_INITONCE_INIT; \
     static PVOID cache = NULL; \
     static ULONG_PTR cookie = 0; \
 \
-    return (_##Name)PhpImportProcedure(&initOnce, &cache, &cookie, Module, #Name); \
+    return (typeof(&(Name)))PhpImportProcedure(&initOnce, &cache, &cookie, Module, #Name); \
 }
 
 PH_DEFINE_IMPORT(L"ntdll.dll", NtQueryInformationEnlistment);
@@ -92,6 +97,11 @@ PH_DEFINE_IMPORT(L"ntdll.dll", RtlGetAppContainerNamedObjectPath);
 PH_DEFINE_IMPORT(L"ntdll.dll", RtlGetAppContainerSidType);
 PH_DEFINE_IMPORT(L"ntdll.dll", RtlGetAppContainerParent);
 PH_DEFINE_IMPORT(L"ntdll.dll", RtlDeriveCapabilitySidsFromName);
+
+PH_DEFINE_IMPORT(L"ntdll.dll", PssNtCaptureSnapshot);
+PH_DEFINE_IMPORT(L"ntdll.dll", PssNtQuerySnapshot);
+PH_DEFINE_IMPORT(L"ntdll.dll", PssNtFreeRemoteSnapshot);
+PH_DEFINE_IMPORT(L"ntdll.dll", NtPssCaptureVaSpaceBulk);
 
 PH_DEFINE_IMPORT(L"advapi32.dll", ConvertSecurityDescriptorToStringSecurityDescriptorW);
 PH_DEFINE_IMPORT(L"advapi32.dll", ConvertStringSecurityDescriptorToSecurityDescriptorW);

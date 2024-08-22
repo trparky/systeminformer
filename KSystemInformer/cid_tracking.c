@@ -474,12 +474,12 @@ NTSTATUS KSIAPI KphpInitializeProcessContext(
 #ifdef _WIN64
     if (PsGetProcessWow64Process(process->EProcess))
     {
-        process->IsWow64 = TRUE;
+        process->IsWow64Process = TRUE;
     }
     else
 #endif
     {
-        process->IsWow64 = FALSE;
+        process->IsWow64Process = FALSE;
     }
 
     KphInitializeRWLock(&process->ThreadListLock);

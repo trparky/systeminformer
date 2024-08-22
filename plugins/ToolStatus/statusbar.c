@@ -244,10 +244,17 @@ VOID StatusBarUpdate(
     {
         // The status bar doesn't cope well with 0 parts.
         widths[0] = -1;
-        SendMessage(StatusBarHandle, SB_SETPARTS, 1, (LPARAM)widths);
-        SendMessage(StatusBarHandle, SB_SETTEXT, 0, (LPARAM)L"");
+
+        if (StatusBarHandle)
+        {
+            SendMessage(StatusBarHandle, SB_SETPARTS, 1, (LPARAM)widths);
+            SendMessage(StatusBarHandle, SB_SETTEXT, 0, (LPARAM)L"");
+        }
         return;
     }
+
+    if (!StatusBarHandle)
+        return;
 
     hdc = GetDC(StatusBarHandle);
     SelectFont(hdc, GetWindowFont(StatusBarHandle));
@@ -686,4 +693,5 @@ VOID StatusBarUpdate(
 
     SendMessage(StatusBarHandle, WM_SETREDRAW, TRUE, 0);
     InvalidateRect(StatusBarHandle, NULL, TRUE);
+    UpdateWindow(StatusBarHandle);
 }

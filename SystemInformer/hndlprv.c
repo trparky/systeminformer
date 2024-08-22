@@ -441,7 +441,7 @@ VOID PhHandleProviderUpdate(
                     // Also compare the object pointers to make sure a
                     // different object wasn't re-opened with the same
                     // handle value.
-                    if (KsiLevel() >= KphLevelMed)
+                    if (KsiLevel() >= KphLevelMed && handleProvider->ProcessHandle)
                     {
                         found = NT_SUCCESS(KphCompareObjects(
                             handleProvider->ProcessHandle,

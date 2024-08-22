@@ -18,9 +18,6 @@
 #include <phappresource.h>
 #include <settings.h>
 
-#include <malloc.h>
-#include <shobjidl.h>
-
 #include "resource.h"
 #include <toolstatusintf.h>
 
@@ -122,6 +119,8 @@ extern HWND NetworkTreeNewHandle;
 extern INT SelectedTabIndex;
 extern BOOLEAN UpdateAutomatically;
 extern BOOLEAN UpdateGraphs;
+extern BOOLEAN EnableAvxSupport;
+extern BOOLEAN EnableGraphMaxScale;
 extern TOOLBAR_DISPLAY_STYLE DisplayStyle;
 extern SEARCHBOX_DISPLAY_MODE SearchBoxDisplayMode;
 extern REBAR_DISPLAY_LOCATION RebarDisplayLocation;
@@ -129,7 +128,7 @@ extern REBAR_DISPLAY_LOCATION RebarDisplayLocation;
 extern HWND RebarHandle;
 extern HWND ToolBarHandle;
 extern HWND SearchboxHandle;
-
+extern HWND MainWindowHandle;
 extern HMENU MainMenu;
 extern HACCEL AcceleratorTable;
 extern ULONG_PTR SearchMatchHandle;

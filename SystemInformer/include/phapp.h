@@ -63,6 +63,7 @@ typedef struct _PH_STARTUP_PARAMETERS
         ULONG Flags;
     };
 
+    PPH_STRING SettingsFileName;
     PPH_STRING RunAsServiceMode;
 
     HWND WindowHandle;
@@ -465,7 +466,7 @@ VOID PhShowProcessHeapsDialog(
 
 // hidnproc
 
-VOID PhShowHiddenProcessesDialog(
+VOID PhShowZombieProcessesDialog(
     VOID
     );
 

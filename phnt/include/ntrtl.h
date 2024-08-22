@@ -9667,6 +9667,7 @@ typedef enum _RTL_BSD_ITEM_TYPE
     RtlBsdItemChecksum, // q: s: UCHAR
     RtlBsdPowerTransitionExtension,
     RtlBsdItemFeatureConfigurationState, // q; s: ULONG
+    RtlBsdItemRevocationListInfo, // 24H2
     RtlBsdItemMax
 } RTL_BSD_ITEM_TYPE;
 

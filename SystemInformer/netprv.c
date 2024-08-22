@@ -246,11 +246,10 @@ VOID PhEnumNetworkItems(
     _Out_ PULONG NumberOfNetworkItems
     )
 {
-    PPH_NETWORK_ITEM* networkItems;
+    PH_ARRAY array;
     PH_HASHTABLE_ENUM_CONTEXT enumContext;
     PPH_NETWORK_ITEM* networkItem;
-    ULONG numberOfNetworkItems;
-    ULONG count = 0;
+    ULONG numberOfNetworkItems = 0;
 
     PhAcquireQueuedLockShared(&PhNetworkHashtableLock);
 
@@ -258,34 +257,32 @@ VOID PhEnumNetworkItems(
 
     while (networkItem = PhNextEnumHashtable(&enumContext))
     {
-        count++;
+        numberOfNetworkItems++;
     }
 
-    if (count == 0)
+    if (numberOfNetworkItems == 0)
     {
         PhReleaseQueuedLockShared(&PhNetworkHashtableLock);
 
         if (NetworkItems) *NetworkItems = NULL;
-        *NumberOfNetworkItems = count;
+        *NumberOfNetworkItems = numberOfNetworkItems;
         return;
     }
 
-    numberOfNetworkItems = count;
-    networkItems = PhAllocate(sizeof(PPH_NETWORK_ITEM) * numberOfNetworkItems);
-    count = 0;
+    PhInitializeArray(&array, sizeof(PPH_NETWORK_ITEM), numberOfNetworkItems);
 
     PhBeginEnumHashtable(PhNetworkHashtable, &enumContext);
 
     while (networkItem = PhNextEnumHashtable(&enumContext))
     {
         PhReferenceObject((*networkItem));
-        networkItems[count++] = (*networkItem);
+        PhAddItemArray(&array, *networkItem);
     }
 
     PhReleaseQueuedLockShared(&PhNetworkHashtableLock);
 
-    *NetworkItems = networkItems;
-    *NumberOfNetworkItems = numberOfNetworkItems;
+    *NetworkItems = PhFinalArrayItems(&array);
+    *NumberOfNetworkItems = (ULONG)PhFinalArrayCount(&array);
 }
 
 VOID PhEnumNetworkItemsByProcessId(
@@ -294,11 +291,10 @@ VOID PhEnumNetworkItemsByProcessId(
     _Out_ PULONG NumberOfNetworkItems
     )
 {
-    PPH_NETWORK_ITEM* networkItems;
+    PH_ARRAY array;
     PH_HASHTABLE_ENUM_CONTEXT enumContext;
     PPH_NETWORK_ITEM* networkItem;
-    ULONG numberOfNetworkItems;
-    ULONG count = 0;
+    ULONG numberOfNetworkItems = 0;
 
     PhAcquireQueuedLockShared(&PhNetworkHashtableLock);
 
@@ -308,22 +304,20 @@ VOID PhEnumNetworkItemsByProcessId(
     {
         if ((*networkItem)->ProcessId == ProcessId)
         {
-            count++;
+            numberOfNetworkItems++;
         }
     }
 
-    if (count == 0)
+    if (numberOfNetworkItems == 0)
     {
         PhReleaseQueuedLockShared(&PhNetworkHashtableLock);
 
         if (NetworkItems) *NetworkItems = NULL;
-        *NumberOfNetworkItems = count;
+        *NumberOfNetworkItems = numberOfNetworkItems;
         return;
     }
 
-    numberOfNetworkItems = count;
-    networkItems = PhAllocate(sizeof(PPH_NETWORK_ITEM) * numberOfNetworkItems);
-    count = 0;
+    PhInitializeArray(&array, sizeof(PPH_NETWORK_ITEM), numberOfNetworkItems);
 
     PhBeginEnumHashtable(PhNetworkHashtable, &enumContext);
 
@@ -331,15 +325,15 @@ VOID PhEnumNetworkItemsByProcessId(
     {
         if ((*networkItem)->ProcessId == ProcessId)
         {
-            PhReferenceObject((*networkItem));
-            networkItems[count++] = (*networkItem);
+            PhReferenceObject(*networkItem);
+            PhAddItemArray(&array, networkItem);
         }
     }
 
     PhReleaseQueuedLockShared(&PhNetworkHashtableLock);
 
-    *NetworkItems = networkItems;
-    *NumberOfNetworkItems = numberOfNetworkItems;
+    *NetworkItems = PhFinalArrayItems(&array);
+    *NumberOfNetworkItems = (ULONG)PhFinalArrayCount(&array);
 }
 
 VOID PhpRemoveNetworkItem(
@@ -832,9 +826,6 @@ VOID PhNetworkItemInvalidateHostname(
     _In_ PPH_NETWORK_ITEM NetworkItem
     )
 {
-    if (!FlagOn(PhNetworkProviderFlagsMask, PH_NETWORK_PROVIDER_FLAG_HOSTNAME))
-        return;
-
     if (NetworkItem->LocalHostString)
     {
         PhDereferenceObject(NetworkItem->LocalHostString);

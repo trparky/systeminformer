@@ -566,7 +566,7 @@ VOID PhpCreateProcessPropSheetWaitContext(
         PhpProcessPropertiesWaitCallback,
         waitContext,
         INFINITE,
-        WT_EXECUTEONLYONCE | WT_EXECUTEINWAITTHREAD
+        WT_EXECUTEONLYONCE | WT_EXECUTEINWAITTHREAD | WT_EXECUTELONGFUNCTION
         )))
     {
         PropContext->ProcessWaitContext = waitContext;

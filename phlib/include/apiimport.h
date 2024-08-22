@@ -230,6 +230,9 @@ typedef VOID (WINAPI* _UnsubscribeServiceChangeNotifications)(
     );
 
 #define PH_DECLARE_IMPORT(Name) _##Name Name##_Import(VOID)
+#define PH_DECLARE_IMPORT_T(Type, Name) Type Name##_Import(VOID)
+
+// Ntdll
 
 PH_DECLARE_IMPORT(NtQueryInformationEnlistment);
 PH_DECLARE_IMPORT(NtQueryInformationResourceManager);
@@ -246,8 +249,17 @@ PH_DECLARE_IMPORT(RtlGetAppContainerSidType);
 PH_DECLARE_IMPORT(RtlGetAppContainerParent);
 PH_DECLARE_IMPORT(RtlDeriveCapabilitySidsFromName);
 
+PH_DECLARE_IMPORT_T(typeof(&PssNtCaptureSnapshot), PssNtCaptureSnapshot);
+PH_DECLARE_IMPORT_T(typeof(&PssNtQuerySnapshot), PssNtQuerySnapshot);
+PH_DECLARE_IMPORT_T(typeof(&PssNtFreeRemoteSnapshot), PssNtFreeRemoteSnapshot);
+PH_DECLARE_IMPORT_T(typeof(&NtPssCaptureVaSpaceBulk), NtPssCaptureVaSpaceBulk);
+
+// Advapi32
+
 PH_DECLARE_IMPORT(ConvertSecurityDescriptorToStringSecurityDescriptorW);
 PH_DECLARE_IMPORT(ConvertStringSecurityDescriptorToSecurityDescriptorW);
+
+// Shlwapi
 
 PH_DECLARE_IMPORT(SHAutoComplete);
 
@@ -260,6 +272,10 @@ PH_DECLARE_IMPORT(DestroyEnvironmentBlock);
 PH_DECLARE_IMPORT(GetAppContainerRegistryLocation);
 PH_DECLARE_IMPORT(GetAppContainerFolderPath);
 
+// User32
+
 PH_DECLARE_IMPORT(SetWindowDisplayAffinity);
+
+EXTERN_C_END
 
 #endif

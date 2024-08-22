@@ -182,7 +182,7 @@ VOID PhAddDefaultSettings(
     PhpAddIntegerSetting(L"MiniInfoWindowOpacity", L"0"); // means 100%
     PhpAddIntegerSetting(L"MiniInfoWindowPinned", L"0");
     PhpAddIntegerPairSetting(L"MiniInfoWindowPosition", L"200,200");
-    PhpAddIntegerSetting(L"MiniInfoWindowRefreshAutomatically", L"1");
+    PhpAddIntegerSetting(L"MiniInfoWindowRefreshAutomatically", L"3");
     PhpAddScalableIntegerPairSetting(L"MiniInfoWindowSize", L"@96|10,200");
     PhpAddIntegerSetting(L"ModuleTreeListFlags", L"1");
     PhpAddStringSetting(L"ModuleTreeListColumns", L"");
@@ -324,6 +324,8 @@ VOID PhAddDefaultSettings(
     PhpAddIntegerSetting(L"ColorProtectedProcess", L"ff8080");
     PhpAddIntegerSetting(L"UseColorInheritHandles", L"1");
     PhpAddIntegerSetting(L"ColorInheritHandles", L"ffff77");
+    PhpAddIntegerSetting(L"UseColorEfficiencyMode", L"1");
+    PhpAddIntegerSetting(L"ColorEfficiencyMode", L"80ff00");
     PhpAddIntegerSetting(L"UseColorServiceDisabled", L"1");
     PhpAddIntegerSetting(L"ColorServiceDisabled", L"6d6d6d"); // Dark grey
     PhpAddIntegerSetting(L"UseColorServiceStop", L"1");
@@ -428,6 +430,8 @@ VOID PhUpdateCachedSettings(
     PH_UPDATE_SETTING(UseColorInheritHandles);
     PH_UPDATE_SETTING(ColorProtectedProcess);
     PH_UPDATE_SETTING(UseColorProtectedProcess);
+    PH_UPDATE_SETTING(ColorEfficiencyMode);
+    PH_UPDATE_SETTING(UseColorEfficiencyMode);
     PH_UPDATE_SETTING(ColorInheritHandles);
     PH_UPDATE_SETTING(UseColorServiceDisabled);
     PH_UPDATE_SETTING(ColorServiceDisabled);

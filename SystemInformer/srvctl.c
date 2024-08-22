@@ -20,6 +20,10 @@
 #include <srvprv.h>
 #include <mainwnd.h>
 
+#include <proctree.h>
+#include <mainwndp.h>
+#include <hndlinfo.h>
+
 typedef struct _PH_SERVICES_CONTEXT
 {
     PPH_SERVICE_ITEM *Services;
@@ -425,6 +429,8 @@ INT_PTR CALLBACK PhpServicesPageProc(
                 {
                     menu = PhCreateEMenu();
                     PhInsertEMenuItem(menu, PhCreateEMenuItem(0, 1, L"Go to service", NULL, NULL), ULONG_MAX);
+                    PhInsertEMenuItem(menu, PhCreateEMenuSeparator(), ULONG_MAX);
+                    PhServiceListInsertContextMenu(hwndDlg, menu, (PPH_SERVICE_ITEM*)listviewItems, numberOfItems);
                     PhInsertEMenuItem(menu, PhCreateEMenuItem(0, IDC_COPY, L"&Copy", NULL, NULL), ULONG_MAX);
                     PhInsertCopyListViewEMenuItem(menu, IDC_COPY, context->ListViewHandle);
 

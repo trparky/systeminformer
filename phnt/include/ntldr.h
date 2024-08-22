@@ -560,9 +560,11 @@ typedef union _LDR_DLL_NOTIFICATION_DATA
     LDR_DLL_UNLOADED_NOTIFICATION_DATA Unloaded;
 } LDR_DLL_NOTIFICATION_DATA, *PLDR_DLL_NOTIFICATION_DATA;
 
+typedef const LDR_DLL_NOTIFICATION_DATA *PCLDR_DLL_NOTIFICATION_DATA;
+
 typedef VOID (NTAPI *PLDR_DLL_NOTIFICATION_FUNCTION)(
     _In_ ULONG NotificationReason,
-    _In_ PLDR_DLL_NOTIFICATION_DATA NotificationData,
+    _In_ PCLDR_DLL_NOTIFICATION_DATA NotificationData,
     _In_opt_ PVOID Context
     );
 
@@ -764,6 +766,70 @@ LdrFindResourceDirectory_U(
     _In_ ULONG Level,
     _Out_ PIMAGE_RESOURCE_DIRECTORY *ResourceDirectory
     );
+
+#if (PHNT_VERSION >= PHNT_WIN8)
+NTSYSAPI
+NTSTATUS
+NTAPI
+LdrResFindResource(
+    _In_ PVOID DllHandle,
+    _In_ ULONG_PTR Type,
+    _In_ ULONG_PTR Name,
+    _In_ ULONG_PTR Language,
+    _Out_opt_ PVOID* ResourceBuffer,
+    _Out_opt_ PULONG ResourceLength,
+    _Out_writes_bytes_opt_(CultureNameLength) PVOID CultureName, // WCHAR buffer[6]
+    _Out_opt_ PULONG CultureNameLength,
+    _In_ ULONG Flags
+    );
+
+NTSYSAPI
+NTSTATUS
+NTAPI
+LdrResFindResourceDirectory(
+    _In_ PVOID DllHandle,
+    _In_ ULONG_PTR Type,
+    _In_ ULONG_PTR Name,
+    _Out_opt_ PIMAGE_RESOURCE_DIRECTORY* ResourceDirectory,
+    _Out_writes_bytes_opt_(CultureNameLength) PVOID CultureName, // WCHAR buffer[6]
+    _Out_opt_ PULONG CultureNameLength,
+    _In_ ULONG Flags
+    );
+
+NTSYSAPI
+NTSTATUS
+NTAPI
+LdrResSearchResource(
+    _In_ PVOID DllHandle,
+    _In_ PLDR_RESOURCE_INFO ResourceInfo,
+    _In_ ULONG Level,
+    _In_ ULONG Flags,
+    _Out_opt_ PVOID* ResourceBuffer,
+    _Out_opt_ PSIZE_T ResourceLength,
+    _Out_writes_bytes_opt_(CultureNameLength) PVOID CultureName, // WCHAR buffer[6]
+    _Out_opt_ PULONG CultureNameLength
+    );
+
+NTSYSAPI
+NTSTATUS
+NTAPI
+LdrResGetRCConfig(
+    _In_ PVOID DllHandle,
+    _In_ SIZE_T Length,
+    _Out_writes_bytes_opt_(Length) PVOID Config,
+    _In_ ULONG Flags,
+    _In_ BOOLEAN AlternateResource // LdrLoadAlternateResourceModule
+    );
+
+NTSYSAPI
+NTSTATUS
+NTAPI
+LdrResRelease(
+    _In_ PVOID DllHandle,
+    _In_opt_ ULONG_PTR CultureNameOrId, // MAKEINTRESOURCE
+    _In_ ULONG Flags
+    );
+#endif
 
 // private
 typedef struct _LDR_ENUM_RESOURCE_ENTRY

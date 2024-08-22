@@ -26,6 +26,15 @@ EXTERN_C_START
 #define PhNtDosDevicesPrefix ((PH_STRINGREF)PH_STRINGREF_INIT(L"\\??\\")) // RtlDosDevicesPrefix
 #define PhWin32ExtendedPathPrefix ((PH_STRINGREF)PH_STRINGREF_INIT(L"\\\\?\\")) // extended-length paths, disable path normalization
 
+FORCEINLINE
+BOOLEAN
+PhIsNullOrInvalidHandle(
+    _In_ HANDLE Handle
+    )
+{
+    return (((ULONG_PTR)Handle + 1) & 0xFFFFFFFFFFFFFFFEuLL) == 0;
+}
+
 // General object-related function types
 
 typedef NTSTATUS (NTAPI *PPH_OPEN_OBJECT)(
@@ -281,7 +290,7 @@ NTSTATUS
 NTAPI
 PhGetProcessCurrentDirectory(
     _In_ HANDLE ProcessHandle,
-    _In_ BOOLEAN IsWow64,
+    _In_ BOOLEAN IsWow64Process,
     _Out_ PPH_STRING* CurrentDirectory
     );
 
@@ -305,6 +314,9 @@ PhGetProcessWindowTitle(
 #define PH_PROCESS_DEP_ENABLED 0x1
 #define PH_PROCESS_DEP_ATL_THUNK_EMULATION_DISABLED 0x2
 #define PH_PROCESS_DEP_PERMANENT 0x4
+#define PH_PROCESS_DEP_EXECUTE_ENABLED 0x8
+#define PH_PROCESS_DEP_IMAGE_ENABLED 0x10
+#define PH_PROCESS_DEP_DISABLE_EXCEPTION_CHAIN 0x20
 
 PHLIBAPI
 NTSTATUS
@@ -467,8 +479,8 @@ NTAPI
 PhGetProcessMappedImageBaseFromAddress(
     _In_ HANDLE ProcessHandle,
     _In_ PVOID Address,
-    _Out_ PVOID* ImageBaseAddress,
-    _Out_opt_ PSIZE_T SizeOfImage
+    _Out_ PVOID* ImageBase,
+    _Out_opt_ PSIZE_T ImageSize
     );
 
 PHLIBAPI
@@ -547,9 +559,28 @@ PhSetEnvironmentVariableRemote(
 PHLIBAPI
 NTSTATUS
 NTAPI
+PhGetWindowClientId(
+    _In_ HWND WindowHandle,
+    _Out_ PCLIENT_ID ClientId
+    );
+
+PHLIBAPI
+NTSTATUS
+NTAPI
 PhDestroyWindowRemote(
     _In_ HANDLE ProcessHandle,
     _In_ HWND WindowHandle
+    );
+
+PHLIBAPI
+NTSTATUS
+NTAPI
+PhWindowThreadBeginInvoke( // PhInvokeWindowThreadProcedureRemote
+    _In_ HWND WindowHandle,
+    _In_ PVOID ApcRoutine,
+    _In_opt_ PVOID ApcArgument1,
+    _In_opt_ PVOID ApcArgument2,
+    _In_opt_ PVOID ApcArgument3
     );
 
 PHLIBAPI
@@ -1273,6 +1304,23 @@ PhSetFileDelete(
 PHLIBAPI
 NTSTATUS
 NTAPI
+PhSetFileRename(
+    _In_ HANDLE FileHandle,
+    _In_opt_ HANDLE RootDirectory,
+    _In_ BOOLEAN ReplaceIfExists,
+    _In_ PPH_STRINGREF NewFileName
+    );
+
+PHLIBAPI
+NTSTATUS
+NTAPI
+PhFlushBuffersFile(
+    _In_ HANDLE FileHandle
+    );
+
+PHLIBAPI
+NTSTATUS
+NTAPI
 PhGetFileHandleName(
     _In_ HANDLE FileHandle,
     _Out_ PPH_STRING *FileName
@@ -1822,6 +1870,20 @@ PhEnumPagefilesEx(
 PHLIBAPI
 NTSTATUS
 NTAPI
+PhEnumPoolTagInformation(
+    _Out_ PVOID* Buffer
+    );
+
+PHLIBAPI
+NTSTATUS
+NTAPI
+PhEnumBigPoolInformation(
+    _Out_ PVOID* Buffer
+    );
+
+PHLIBAPI
+NTSTATUS
+NTAPI
 PhGetProcessIsDotNet(
     _In_ HANDLE ProcessId,
     _Out_ PBOOLEAN IsDotNet
@@ -1851,6 +1913,16 @@ PhGetProcessIsDotNetEx(
     _In_ ULONG InFlags,
     _Out_opt_ PBOOLEAN IsDotNet,
     _Out_opt_ PULONG Flags
+    );
+
+PHLIBAPI
+NTSTATUS
+NTAPI
+PhOpenDirectoryObject(
+    _Out_ PHANDLE DirectoryHandle,
+    _In_ ACCESS_MASK DesiredAccess,
+    _In_opt_ HANDLE RootDirectory,
+    _In_ PPH_STRINGREF ObjectName
     );
 
 /**
@@ -2046,6 +2118,13 @@ PhUpdateDosDevicePrefixes(
     );
 
 PHLIBAPI
+BOOLEAN
+NTAPI
+PhIsMupDevicePrefix(
+    _In_ PPH_STRINGREF FileName
+    );
+
+PHLIBAPI
 NTSTATUS
 NTAPI
 PhFlushVolumeCache(
@@ -2237,6 +2316,14 @@ PhQueryKey(
     _In_ HANDLE KeyHandle,
     _In_ KEY_INFORMATION_CLASS KeyInformationClass,
     _Out_ PVOID *Buffer
+    );
+
+PHLIBAPI
+NTSTATUS
+NTAPI
+PhQueryKeyInformation(
+    _In_ HANDLE KeyHandle,
+    _Out_opt_ PKEY_FULL_INFORMATION Information
     );
 
 PHLIBAPI
@@ -2482,6 +2569,16 @@ PhReOpenFile(
     _In_ ACCESS_MASK DesiredAccess,
     _In_ ULONG ShareAccess,
     _In_ ULONG OpenOptions
+    );
+
+PHLIBAPI
+NTSTATUS
+NTAPI
+PhWriteFile(
+    _In_ HANDLE FileHandle,
+    _In_ PVOID Buffer,
+    _In_opt_ ULONG NumberOfBytesToWrite,
+    _Out_opt_ PULONG NumberOfBytesWritten
     );
 
 PHLIBAPI
@@ -2771,6 +2868,14 @@ PhEnumDirectoryNamedPipe(
 PHLIBAPI
 NTSTATUS
 NTAPI
+PhGetContextThread(
+    _In_ HANDLE ThreadHandle,
+    _Inout_ PCONTEXT ThreadContext
+    );
+
+PHLIBAPI
+NTSTATUS
+NTAPI
 PhGetThreadName(
     _In_ HANDLE ThreadHandle,
     _Out_ PPH_STRING *ThreadName
@@ -3000,6 +3105,15 @@ PhGetProcessSystemDllInitBlock(
 PHLIBAPI
 NTSTATUS
 NTAPI
+PhGetProcessTelemetryIdInformation(
+    _In_ HANDLE ProcessHandle,
+    _Out_ PPROCESS_TELEMETRY_ID_INFORMATION* TelemetryInformation,
+    _Out_opt_ PULONG TelemetryInformationLength
+    );
+
+PHLIBAPI
+NTSTATUS
+NTAPI
 PhGetProcessTlsBitMapCounters(
     _In_ HANDLE ProcessHandle,
     _Out_ PULONG TlsBitMapCount,
@@ -3200,16 +3314,10 @@ PhDestroyExecutionRequiredRequest(
     );
 
 PHLIBAPI
-BOOLEAN
-NTAPI
-PhIsProcessStateFrozen(
-    _In_ HANDLE ProcessId
-    );
-
-PHLIBAPI
 NTSTATUS
 NTAPI
 PhFreezeProcess(
+    _Out_ PHANDLE FreezeHandle,
     _In_ HANDLE ProcessId
     );
 
@@ -3217,6 +3325,7 @@ PHLIBAPI
 NTSTATUS
 NTAPI
 PhThawProcess(
+    _In_ HANDLE FreezeHandle,
     _In_ HANDLE ProcessId
     );
 

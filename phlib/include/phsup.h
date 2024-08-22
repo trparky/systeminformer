@@ -23,9 +23,9 @@
 #include <malloc.h>
 
 // Memory
-
 #define PTR_ADD_OFFSET(Pointer, Offset) ((PVOID)((ULONG_PTR)(Pointer) + (ULONG_PTR)(Offset)))
 #define PTR_SUB_OFFSET(Pointer, Offset) ((PVOID)((ULONG_PTR)(Pointer) - (ULONG_PTR)(Offset)))
+
 #define ALIGN_UP_BY(Address, Align) (((ULONG_PTR)(Address) + (Align) - 1) & ~((Align) - 1))
 #define ALIGN_UP_POINTER_BY(Pointer, Align) ((PVOID)ALIGN_UP_BY(Pointer, Align))
 #define ALIGN_UP(Address, Type) ALIGN_UP_BY(Address, sizeof(Type))
@@ -42,6 +42,7 @@
 
 #define BYTE_OFFSET(Address) ((SIZE_T)((ULONG_PTR)(Address) & PAGE_MASK))
 #define PAGE_ALIGN(Address) ((PVOID)((ULONG_PTR)(Address) & ~PAGE_MASK))
+#define PAGE_OFFSET(p) ((PAGE_MASK) & (ULONG_PTR)(p))
 
 #define ADDRESS_AND_SIZE_TO_SPAN_PAGES(Address, Size) ((BYTE_OFFSET(Address) + ((SIZE_T)(Size)) + PAGE_MASK) >> PAGE_SHIFT)
 #define ROUND_TO_SIZE(Size, Alignment) ((((ULONG_PTR)(Size))+((Alignment)-1)) & ~(ULONG_PTR)((Alignment)-1))
@@ -49,6 +50,12 @@
 #define BYTES_TO_PAGES(Size) (((Size) >> PAGE_SHIFT) + (((Size) & PAGE_MASK) != 0))
 
 #define PH_LARGE_BUFFER_SIZE (256 * 1024 * 1024)
+
+#define XMM_SIZE sizeof(__m128i)
+#define XMM_OFFSET(p) ((XMM_SIZE - 1) & (ULONG_PTR)(p))
+#define XMM_CHARS (XMM_SIZE / sizeof(wchar_t))
+#define XMM_CHAR_ALIGNED(p) (0 == (((ULONG_PTR)(p) + sizeof(wchar_t) - 1) & (0-sizeof(wchar_t)) & (XMM_SIZE-1)))
+#define XMM_PAGE_SAFE(p) (PAGE_OFFSET(p) <= (PAGE_SIZE - XMM_SIZE))
 
 // Exceptions
 
@@ -282,14 +289,6 @@ typedef int (__cdecl *PC_COMPARE_FUNCTION)(void *, const void *, const void *);
 // Synchronization
 
 #ifndef _WIN64
-
-#ifndef _InterlockedCompareExchangePointer
-void *_InterlockedCompareExchangePointer(
-    void *volatile *Destination,
-    void *Exchange,
-    void *Comparand
-    );
-#endif
 
 #if (_MSC_VER < 1900)
 #ifndef _InterlockedExchangePointer

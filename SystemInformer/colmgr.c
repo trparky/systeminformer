@@ -64,7 +64,7 @@ VOID PhCmDeleteManager(
 PPH_CM_COLUMN PhCmCreateColumn(
     _Inout_ PPH_CM_MANAGER Manager,
     _In_ PPH_TREENEW_COLUMN Column,
-    _In_ struct _PH_PLUGIN *Plugin,
+    _In_ PPH_PLUGIN Plugin,
     _In_ ULONG SubId,
     _In_opt_ PVOID Context,
     _In_opt_ PVOID SortFunction
@@ -73,7 +73,7 @@ PPH_CM_COLUMN PhCmCreateColumn(
     PPH_CM_COLUMN column;
     PH_TREENEW_COLUMN tnColumn;
 
-    column = PhAllocateZero(sizeof(PH_CM_COLUMN));
+    column = PhAllocate(sizeof(PH_CM_COLUMN));
     column->Id = Manager->NextId++;
     column->Plugin = Plugin;
     column->SubId = SubId;
@@ -97,6 +97,14 @@ PPH_CM_COLUMN PhCmCreateColumn(
     return column;
 }
 
+/*
+ * Find a column in the column manager.
+ *
+ * @param Manager The column manager.
+ * @param PluginName The name of the plugin.
+ * @param SubId The sub ID of the column.
+ * @return The found column or NULL if not found.
+ */
 PPH_CM_COLUMN PhCmFindColumn(
     _In_ PPH_CM_MANAGER Manager,
     _In_ PPH_STRINGREF PluginName,
@@ -123,7 +131,7 @@ PPH_CM_COLUMN PhCmFindColumn(
 
 VOID PhCmSetNotifyPlugin(
     _In_ PPH_CM_MANAGER Manager,
-    _In_ struct _PH_PLUGIN *Plugin
+    _In_ PPH_PLUGIN Plugin
     )
 {
     if (!Manager->NotifyList)
@@ -150,11 +158,13 @@ BOOLEAN PhCmForwardMessage(
     PH_PLUGIN_TREENEW_MESSAGE pluginMessage;
     PPH_PLUGIN plugin;
 
-    if (Message == TreeNewDestroying)
-        return FALSE;
-
     switch (Message)
     {
+    case TreeNewDestroying:
+        {
+            return FALSE;
+        }
+        break;
     case TreeNewGetCellText:
         {
             PPH_TREENEW_GET_CELL_TEXT getCellText = Parameter1;
@@ -279,6 +289,9 @@ BOOLEAN PhCmForwardSort(
 
     if (SortColumn < Manager->MinId)
         return FALSE;
+
+    if (!Manager->Handle)
+        return TRUE;
 
     if (!TreeNew_GetColumn(Manager->Handle, SortColumn, &tnColumn))
         return TRUE;

@@ -89,7 +89,8 @@ typedef struct _PH_PROCESS_QUERY_S1_DATA
             ULONG IsBeingDebugged : 1;
             ULONG IsImmersive : 1;
             ULONG IsFilteredHandle : 1;
-            ULONG Spare : 25;
+            ULONG PowerThrottling : 1;
+            ULONG Spare : 24;
         };
     };
 
@@ -742,7 +743,7 @@ VOID PhpProcessQueryStage1(
                 processId,
                 processHandle,
 #ifdef _WIN64
-                processQueryFlags | PH_CLR_NO_WOW64_CHECK | (processItem->IsWow64 ? PH_CLR_KNOWN_IS_WOW64 : 0),
+                processQueryFlags | PH_CLR_NO_WOW64_CHECK | (processItem->IsWow64Process ? PH_CLR_KNOWN_IS_WOW64 : 0),
 #else
                 processQueryFlags,
 #endif
@@ -840,6 +841,35 @@ VOID PhpProcessQueryStage1(
         if (NT_SUCCESS(PhGetProcessIsBeingDebugged(processHandleLimited, &isBeingDebugged)))
         {
             Data->IsBeingDebugged = isBeingDebugged;
+        }
+    }
+
+    // Process Throttling State
+    {
+        if (processHandleLimited && !processItem->IsSubsystemProcess)
+        {
+            POWER_THROTTLING_PROCESS_STATE powerThrottlingState;
+
+            if (NT_SUCCESS(PhGetProcessPowerThrottlingState(processHandleLimited, &powerThrottlingState)))
+            {
+                if (FlagOn(powerThrottlingState.ControlMask, POWER_THROTTLING_PROCESS_EXECUTION_SPEED) &&
+                    FlagOn(powerThrottlingState.StateMask, POWER_THROTTLING_PROCESS_EXECUTION_SPEED))
+                {
+                    Data->PowerThrottling = TRUE;
+                }
+
+                if (FlagOn(powerThrottlingState.ControlMask, POWER_THROTTLING_PROCESS_DELAYTIMERS) &&
+                    FlagOn(powerThrottlingState.StateMask, POWER_THROTTLING_PROCESS_DELAYTIMERS))
+                {
+                    Data->PowerThrottling = TRUE;
+                }
+
+                if (FlagOn(powerThrottlingState.ControlMask, POWER_THROTTLING_PROCESS_IGNORE_TIMER_RESOLUTION) &&
+                    FlagOn(powerThrottlingState.StateMask, POWER_THROTTLING_PROCESS_IGNORE_TIMER_RESOLUTION))
+                {
+                    Data->PowerThrottling = TRUE;
+                }
+            }
         }
     }
 
@@ -1027,6 +1057,7 @@ VOID PhpFillProcessItemStage1(
     processItem->IsBeingDebugged = Data->IsBeingDebugged;
     processItem->IsImmersive = Data->IsImmersive;
     processItem->IsProtectedHandle = Data->IsFilteredHandle;
+    processItem->IsPowerThrottling = Data->PowerThrottling;
 
     PhSwapReference(&processItem->Record->CommandLine, processItem->CommandLine);
 
@@ -1134,7 +1165,7 @@ VOID PhpFillProcessItem(
             ProcessItem->IsProtectedProcess = basicInfo.IsProtectedProcess;
             ProcessItem->IsSecureProcess = basicInfo.IsSecureProcess;
             ProcessItem->IsSubsystemProcess = basicInfo.IsSubsystemProcess;
-            ProcessItem->IsWow64 = basicInfo.IsWow64Process;
+            ProcessItem->IsWow64Process = basicInfo.IsWow64Process;
             ProcessItem->IsPackagedProcess = basicInfo.IsStronglyNamed;
         }
 
@@ -1178,7 +1209,7 @@ VOID PhpFillProcessItem(
         {
             PPH_STRING fileName;
 
-            if (fileName = PhGetKernelFileName2())
+            if (fileName = PhGetKernelFileName())
             {
                 ProcessItem->FileName = fileName;
                 ProcessItem->FileNameWin32 = PhGetFileName(fileName);
@@ -2785,6 +2816,43 @@ VOID PhProcessProviderUpdate(
                 }
             }
 
+            // Process Throttling State
+            {
+                BOOLEAN isPowerThrottling = FALSE;
+
+                if (processItem->QueryHandle && !processItem->IsSubsystemProcess)
+                {
+                    POWER_THROTTLING_PROCESS_STATE powerThrottlingState;
+
+                    if (NT_SUCCESS(PhGetProcessPowerThrottlingState(processItem->QueryHandle, &powerThrottlingState)))
+                    {
+                        if (FlagOn(powerThrottlingState.ControlMask, POWER_THROTTLING_PROCESS_EXECUTION_SPEED) &&
+                            FlagOn(powerThrottlingState.StateMask, POWER_THROTTLING_PROCESS_EXECUTION_SPEED))
+                        {
+                            isPowerThrottling = TRUE;
+                        }
+
+                        if (FlagOn(powerThrottlingState.ControlMask, POWER_THROTTLING_PROCESS_DELAYTIMERS) &&
+                            FlagOn(powerThrottlingState.StateMask, POWER_THROTTLING_PROCESS_DELAYTIMERS))
+                        {
+                            isPowerThrottling = TRUE;
+                        }
+
+                        if (FlagOn(powerThrottlingState.ControlMask, POWER_THROTTLING_PROCESS_IGNORE_TIMER_RESOLUTION) &&
+                            FlagOn(powerThrottlingState.StateMask, POWER_THROTTLING_PROCESS_IGNORE_TIMER_RESOLUTION))
+                        {
+                            isPowerThrottling = TRUE;
+                        }
+                    }
+                }
+
+                if (processItem->IsPowerThrottling != isPowerThrottling)
+                {
+                    processItem->IsPowerThrottling = isPowerThrottling;
+                    modified = TRUE;
+                }
+            }
+
             // Suspended
             if (processItem->IsSuspended != isSuspended)
             {
@@ -3809,8 +3877,9 @@ HIMAGELIST PhGetProcessSmallImageList(
     return PhProcessSmallImageList;
 }
 
+_Success_(return)
 BOOLEAN PhDuplicateProcessInformation(
-    _Out_ PPVOID ProcessInformation
+    _Outptr_ PPVOID ProcessInformation
     )
 {
     SIZE_T infoLength;

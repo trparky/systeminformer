@@ -26,14 +26,14 @@
 #include <procprv.h>
 #include <settings.h>
 
-static PH_KEY_VALUE_PAIR PhProtectedTypeStrings[] =
+static CONST PH_KEY_VALUE_PAIR PhProtectedTypeStrings[] =
 {
     SIP(L"None", PsProtectedTypeNone),
     SIP(L"Light", PsProtectedTypeProtectedLight),
     SIP(L"Full", PsProtectedTypeProtected),
 };
 
-static PH_KEY_VALUE_PAIR PhProtectedSignerStrings[] =
+static CONST PH_KEY_VALUE_PAIR PhProtectedSignerStrings[] =
 {
     SIP(L" ", PsProtectedSignerNone),
     SIP(L" (Authenticode)", PsProtectedSignerAuthenticode),
@@ -130,7 +130,7 @@ PPH_STRING PhGetProcessItemImageTypeText(
     }
 
 #if _WIN64
-    bits = ProcessItem->IsWow64 ? L"(32-bit)" : L"(64-bit)";
+    bits = ProcessItem->IsWow64Process ? L"(32-bit)" : L"(64-bit)";
 #else
     bits = L"(32-bit)";
 #endif
@@ -421,7 +421,7 @@ INT_PTR CALLBACK PhpProcessGeneralDlgProc(
                 // Tell the function to get the WOW64 current directory, because that's the one that actually gets updated.
                 if (NT_SUCCESS(PhGetProcessCurrentDirectory(
                     processHandle,
-                    !!processItem->IsWow64,
+                    !!processItem->IsWow64Process,
                     &curDir
                     )))
                 {

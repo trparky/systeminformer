@@ -11,8 +11,17 @@
 
 #if (PHNT_MODE != PHNT_MODE_KERNEL)
 
+//
 // Thread execution
+//
 
+/**
+ * Delays the execution of the current thread for a specified interval.
+ *
+ * @param Alertable Specifies whether the delay can be interrupted by an alert.
+ * @param DelayInterval The interval to delay the execution.
+ * @return NTSTATUS Returns the status of the delay execution operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -21,8 +30,19 @@ NtDelayExecution(
     _In_ PLARGE_INTEGER DelayInterval
     );
 
+//
 // Environment values
+//
 
+/**
+ * Retrieves the value of a system environment variable.
+ *
+ * @param VariableName The name of the variable to retrieve.
+ * @param VariableValue The buffer to receive the variable value.
+ * @param ValueLength The length of the buffer in bytes.
+ * @param ReturnLength Optional. Receives the length of the variable value.
+ * @return NTSTATUS Returns the status of the query operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -33,6 +53,13 @@ NtQuerySystemEnvironmentValue(
     _Out_opt_ PUSHORT ReturnLength
     );
 
+/**
+ * Sets the value of a system environment variable.
+ *
+ * @param VariableName The name of the variable to set.
+ * @param VariableValue The value to set for the variable.
+ * @return NTSTATUS Returns the status of the set operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -41,15 +68,57 @@ NtSetSystemEnvironmentValue(
     _In_ PUNICODE_STRING VariableValue
     );
 
+/**
+ * Non-volatile variable attribute.
+ * This attribute indicates that the variable is non-volatile and will be preserved across system reboots.
+ */
 #define EFI_VARIABLE_NON_VOLATILE 0x00000001
+/**
+ * Boot service access attribute.
+ * This attribute indicates that the variable is accessible during boot services.
+ */
 #define EFI_VARIABLE_BOOTSERVICE_ACCESS 0x00000002
+/**
+ * Runtime access attribute.
+ * This attribute indicates that the variable is accessible during runtime.
+ */
 #define EFI_VARIABLE_RUNTIME_ACCESS 0x00000004
+/**
+ * Hardware error record attribute.
+ * This attribute indicates that the variable contains a hardware error record.
+ */
 #define EFI_VARIABLE_HARDWARE_ERROR_RECORD 0x00000008
+/**
+ * Authenticated write access attribute.
+ * This attribute indicates that the variable requires authenticated write access.
+ */
 #define EFI_VARIABLE_AUTHENTICATED_WRITE_ACCESS 0x00000010
+/**
+ * Time-based authenticated write access attribute.
+ * This attribute indicates that the variable requires time-based authenticated write access.
+ */
 #define EFI_VARIABLE_TIME_BASED_AUTHENTICATED_WRITE_ACCESS 0x00000020
+/**
+ * Append write attribute.
+ * This attribute indicates that the variable supports append writes.
+ */
 #define EFI_VARIABLE_APPEND_WRITE 0x00000040
+/**
+ * Enhanced authenticated access attribute.
+ * This attribute indicates that the variable requires enhanced authenticated access.
+ */
 #define EFI_VARIABLE_ENHANCED_AUTHENTICATED_ACCESS 0x00000080
 
+/**
+ * Retrieves the value of a system environment variable with extended attributes.
+ *
+ * @param VariableName The name of the variable to retrieve.
+ * @param VendorGuid The vendor GUID of the variable.
+ * @param Value The buffer to receive the variable value.
+ * @param ValueLength On input, specifies the length of the buffer. On output, receives the length of the variable value.
+ * @param Attributes Optional. Receives the attributes of the variable.
+ * @return NTSTATUS Returns the status of the query operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -61,6 +130,16 @@ NtQuerySystemEnvironmentValueEx(
     _Out_opt_ PULONG Attributes // EFI_VARIABLE_*
     );
 
+/**
+ * Sets the value of a system environment variable with extended attributes.
+ *
+ * @param VariableName The name of the variable to set.
+ * @param VendorGuid The vendor GUID of the variable.
+ * @param Value The value to set for the variable.
+ * @param ValueLength The length of the value in bytes. Use 0 to delete the variable.
+ * @param Attributes The attributes of the variable.
+ * @return NTSTATUS Returns the status of the set operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -79,24 +158,69 @@ typedef enum _SYSTEM_ENVIRONMENT_INFORMATION_CLASS
     MaxSystemEnvironmentInfoClass
 } SYSTEM_ENVIRONMENT_INFORMATION_CLASS;
 
+/**
+ * Represents a variable name structure.
+ */
 typedef struct _VARIABLE_NAME
 {
+    /**
+    * The offset to the next entry in the list.
+    */
     ULONG NextEntryOffset;
+    /**
+    * The GUID of the vendor associated with the variable.
+    */
     GUID VendorGuid;
+    /**
+    * The name of the variable.
+    */
     WCHAR Name[ANYSIZE_ARRAY];
 } VARIABLE_NAME, *PVARIABLE_NAME;
 
+/**
+ * Represents a firmware variable name and value.
+ */
 typedef struct _VARIABLE_NAME_AND_VALUE
 {
+    /**
+     * Offset to the next entry in the list.
+     */
     ULONG NextEntryOffset;
+    /**
+     * Offset to the value of the variable. 
+     */
     ULONG ValueOffset;
+    /**
+     * Attributes of the variable.
+     */ 
     ULONG ValueLength;
+    /**
+     * Attributes of the variable.
+     */
     ULONG Attributes;
+    /**
+     * Specifies the vendor GUID associated with the variable.
+     */
     GUID VendorGuid;
+    /**
+     * Specifies the name of the variable.
+     */
     WCHAR Name[ANYSIZE_ARRAY];
-    //BYTE Value[ANYSIZE_ARRAY];
+    /**
+     * The value or data of the variable immediately after following the Name field.
+     * 
+     * BYTE Value[ANYSIZE_ARRAY];
+     */
 } VARIABLE_NAME_AND_VALUE, *PVARIABLE_NAME_AND_VALUE;
 
+/**
+ * Enumerates the system environment variables with extended attributes.
+ *
+ * @param InformationClass The information class to query. Can be SystemEnvironmentNameInformation or SystemEnvironmentValueInformation.
+ * @param Buffer The buffer to receive the variable information.
+ * @param BufferLength On input, specifies the length of the buffer. On output, receives the length of the variable information.
+ * @return NTSTATUS Returns the status of the enumeration operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -106,55 +230,150 @@ NtEnumerateSystemEnvironmentValuesEx(
     _Inout_ PULONG BufferLength
     );
 
+//
 // EFI
+//
 
-// private
+/**
+ * Represents a boot entry.
+ */
 typedef struct _BOOT_ENTRY
 {
+    /**
+    * Version of the boot entry structure.
+    */
     ULONG Version;
+    /**
+    * Length of the boot entry structure.
+    */
     ULONG Length;
+    /**
+    * Identifier for the boot entry.
+    */
     ULONG Id;
+    /**
+    * Attributes of the boot entry.
+    */
     ULONG Attributes;
+    /**
+    * Offset to the friendly name of the boot entry.
+    */
     ULONG FriendlyNameOffset;
+    /**
+    * Offset to the boot file path.
+    */
     ULONG BootFilePathOffset;
+    /**
+    * Length of the OS options.
+    */
     ULONG OsOptionsLength;
+    /**
+    * OS options data.
+    */
     _Field_size_bytes_(OsOptionsLength) UCHAR OsOptions[1];
 } BOOT_ENTRY, *PBOOT_ENTRY;
 
-// private
+/**
+ * Represents a list of boot entries.
+ *
+ * @remarks private
+ */
 typedef struct _BOOT_ENTRY_LIST
 {
+    /**
+    * Offset to the next boot entry in the list.
+    */
     ULONG NextEntryOffset;
+    /**
+    * Boot entry data.
+    */
     BOOT_ENTRY BootEntry;
 } BOOT_ENTRY_LIST, *PBOOT_ENTRY_LIST;
 
-// private
+/**
+ * Represents boot options.
+ * 
+ * @remarks private
+ */
 typedef struct _BOOT_OPTIONS
 {
+    /**
+     * Version of the boot options structure.
+     */
     ULONG Version;
+    /**
+     * Length of the boot options structure.
+     */
     ULONG Length;
+    /**
+     * Timeout value for the boot options.
+     */
     ULONG Timeout;
+    /**
+     * ID of the current boot entry.
+     */
     ULONG CurrentBootEntryId;
+    /**
+     * ID of the next boot entry.
+     */
     ULONG NextBootEntryId;
+    /**
+     * Headless redirection data.
+     */
     WCHAR HeadlessRedirection[1];
 } BOOT_OPTIONS, *PBOOT_OPTIONS;
 
-// private
+/**
+* Represents a file path.
+* 
+* @remarks private
+*/
 typedef struct _FILE_PATH
 {
+    /**
+    * Version of the file path structure.
+    */
     ULONG Version;
+    /**
+    * Length of the file path structure.
+    */
     ULONG Length;
+    /**
+    * Type of the file path.
+    */
     ULONG Type;
+    /**
+     * File path data.
+     */
     _Field_size_bytes_(Length) UCHAR FilePath[1];
 } FILE_PATH, *PFILE_PATH;
 
-// private
+/**
+ * Represents an EFI driver entry.
+ * 
+ * @remarks private
+ */
 typedef struct _EFI_DRIVER_ENTRY
 {
+    /**
+    * Version of the EFI driver entry structure.
+    */
     ULONG Version;
+    /**
+    * Length of the EFI driver entry structure.
+    */
     ULONG Length;
+    /**
+    * Identifier for the EFI driver entry.
+    */
     ULONG Id;
+    /**
+    * Offset to the friendly name of the EFI driver entry.
+    */
     ULONG FriendlyNameOffset;
+    /**
+    * Offset to the driver file path.
+    */
     ULONG DriverFilePathOffset;
 } EFI_DRIVER_ENTRY, *PEFI_DRIVER_ENTRY;
 
@@ -167,6 +386,13 @@ typedef struct _EFI_DRIVER_ENTRY_LIST
 
 #if (PHNT_VERSION >= PHNT_WINXP)
 
+/**
+ * Adds a new boot entry.
+ *
+ * @param BootEntry The boot entry to add.
+ * @param Id Optional. Receives the ID of the added boot entry.
+ * @return NTSTATUS Returns the status of the add operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -175,6 +401,12 @@ NtAddBootEntry(
     _Out_opt_ PULONG Id
     );
 
+/**
+ * Deletes a boot entry.
+ *
+ * @param Id The ID of the boot entry to delete.
+ * @return NTSTATUS Returns the status of the delete operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -182,6 +414,12 @@ NtDeleteBootEntry(
     _In_ ULONG Id
     );
 
+/**
+ * Modifies an existing boot entry.
+ *
+ * @param BootEntry The boot entry to modify.
+ * @return NTSTATUS Returns the status of the modify operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -189,6 +427,13 @@ NtModifyBootEntry(
     _In_ PBOOT_ENTRY BootEntry
     );
 
+/**
+ * Enumerates the boot entries.
+ *
+ * @param Buffer The buffer to receive the boot entry information.
+ * @param BufferLength On input, specifies the length of the buffer. On output, receives the length of the boot entry information.
+ * @return NTSTATUS Returns the status of the enumeration operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -197,6 +442,13 @@ NtEnumerateBootEntries(
     _Inout_ PULONG BufferLength
     );
 
+/**
+ * Retrieves the boot entry order.
+ *
+ * @param Ids The buffer to receive the boot entry IDs.
+ * @param Count On input, specifies the size of the buffer. On output, receives the number of boot entries.
+ * @return NTSTATUS Returns the status of the query operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -205,6 +457,13 @@ NtQueryBootEntryOrder(
     _Inout_ PULONG Count
     );
 
+/**
+ * Sets the boot entry order.
+ *
+ * @param Ids The buffer containing the boot entry IDs.
+ * @param Count The number of boot entries.
+ * @return NTSTATUS Returns the status of the set operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -213,6 +472,13 @@ NtSetBootEntryOrder(
     _In_ ULONG Count
     );
 
+/**
+ * Retrieves the boot options.
+ *
+ * @param BootOptions The buffer to receive the boot options.
+ * @param BootOptionsLength On input, specifies the length of the buffer. On output, receives the length of the boot options.
+ * @return NTSTATUS Returns the status of the query operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -221,6 +487,13 @@ NtQueryBootOptions(
     _Inout_ PULONG BootOptionsLength
     );
 
+/**
+ * Sets the boot options.
+ *
+ * @param BootOptions The boot options to set.
+ * @param FieldsToChange The fields to change in the boot options.
+ * @return NTSTATUS Returns the status of the set operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -229,6 +502,15 @@ NtSetBootOptions(
     _In_ ULONG FieldsToChange
     );
 
+/**
+ * Translates a file path.
+ *
+ * @param InputFilePath The input file path to translate.
+ * @param OutputType The type of the output file path.
+ * @param OutputFilePath The buffer to receive the translated file path.
+ * @param OutputFilePathLength On input, specifies the length of the buffer. On output, receives the length of the translated file path.
+ * @return NTSTATUS Returns the status of the translation operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -239,6 +521,13 @@ NtTranslateFilePath(
     _Inout_opt_ PULONG OutputFilePathLength
     );
 
+/**
+ * Adds a new driver entry.
+ *
+ * @param DriverEntry The driver entry to add.
+ * @param Id Optional. Receives the ID of the added driver entry.
+ * @return NTSTATUS Returns the status of the add operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -247,6 +536,12 @@ NtAddDriverEntry(
     _Out_opt_ PULONG Id
     );
 
+/**
+ * Deletes a driver entry.
+ *
+ * @param Id The ID of the driver entry to delete.
+ * @return NTSTATUS code indicating success or failure of the operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -254,6 +549,12 @@ NtDeleteDriverEntry(
     _In_ ULONG Id
     );
 
+/**
+ * Modifies a driver entry.
+ *
+ * @param DriverEntry Pointer to the EFI driver entry structure to modify.
+ * @return NTSTATUS code indicating success or failure of the operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -261,6 +562,13 @@ NtModifyDriverEntry(
     _In_ PEFI_DRIVER_ENTRY DriverEntry
     );
 
+/**
+ * Enumerates driver entries.
+ *
+ * @param Buffer Pointer to the buffer that receives the driver entries. The buffer is optional and can be NULL.
+ * @param BufferLength Pointer to a variable that specifies the size of the buffer. On input, it specifies the size of the buffer. On output, it receives the size of the data returned.
+ * @return NTSTATUS code indicating success or failure of the operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -269,6 +577,13 @@ NtEnumerateDriverEntries(
     _Inout_ PULONG BufferLength
     );
 
+/**
+ * Queries the order of driver entries.
+ *
+ * @param Ids Pointer to the buffer that receives the IDs of the driver entries. The buffer is optional and can be NULL.
+ * @param Count Pointer to a variable that specifies the number of IDs. On input, it specifies the size of the buffer. On output, it receives the number of IDs returned.
+ * @return NTSTATUS code indicating success or failure of the operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -277,6 +592,13 @@ NtQueryDriverEntryOrder(
     _Inout_ PULONG Count
     );
 
+/**
+ * Sets the order of driver entries.
+ *
+ * @param Ids Pointer to an array of IDs that specifies the new order of the driver entries.
+ * @param Count The number of IDs in the array.
+ * @return NTSTATUS code indicating success or failure of the operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -287,16 +609,44 @@ NtSetDriverEntryOrder(
 
 #endif
 
+/**
+ * Enumeration for filter boot option operations.
+ */
 typedef enum _FILTER_BOOT_OPTION_OPERATION
 {
+    /**
+     * Open the system store.
+     */
     FilterBootOptionOperationOpenSystemStore,
+
+    /**
+     * Set an element in the boot options.
+     */
     FilterBootOptionOperationSetElement,
+
+    /**
+     * Delete an element from the boot options.
+     */
     FilterBootOptionOperationDeleteElement,
+
+    /**
+     * Maximum value for the enumeration.
+     */
     FilterBootOptionOperationMax
 } FILTER_BOOT_OPTION_OPERATION;
 
 #if (PHNT_VERSION >= PHNT_WIN8)
 
+/**
+ * Filters boot options.
+ *
+ * @param FilterOperation Specifies the filter operation to perform.
+ * @param ObjectType Specifies the type of object to filter.
+ * @param ElementType Specifies the type of element to filter.
+ * @param Data Pointer to the data buffer. The buffer is optional and can be NULL.
+ * @param DataSize Specifies the size of the data buffer.
+ * @return NTSTATUS code indicating success or failure of the operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -310,7 +660,9 @@ NtFilterBootOption(
 
 #endif
 
+//
 // Event
+//
 
 #ifndef EVENT_QUERY_STATE
 #define EVENT_QUERY_STATE 0x0001
@@ -324,17 +676,43 @@ NtFilterBootOption(
 #define EVENT_ALL_ACCESS (EVENT_QUERY_STATE|EVENT_MODIFY_STATE|STANDARD_RIGHTS_REQUIRED|SYNCHRONIZE)
 #endif
 
+/**
+ * Enumeration for event information classes.
+ */
 typedef enum _EVENT_INFORMATION_CLASS
 {
+    /**
+    * Basic event information class.
+    */
     EventBasicInformation
 } EVENT_INFORMATION_CLASS;
 
+/**
+ * Structure that contains basic information about an event.
+ */
 typedef struct _EVENT_BASIC_INFORMATION
 {
+    /**
+    * The type of the event.
+    */
     EVENT_TYPE EventType;
+
+    /**
+    * The current state of the event.
+    */
     LONG EventState;
 } EVENT_BASIC_INFORMATION, *PEVENT_BASIC_INFORMATION;
 
+/**
+ * Creates an event object.
+ *
+ * @param EventHandle Pointer to a handle that receives the event object.
+ * @param DesiredAccess Specifies the desired access for the event object.
+ * @param ObjectAttributes Optional pointer to the object attributes structure.
+ * @param EventType Specifies the type of event (notification or synchronization).
+ * @param InitialState Specifies the initial state of the event (TRUE for signaled, FALSE for non-signaled).
+ * @return NTSTATUS code indicating success or failure of the operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -346,6 +724,14 @@ NtCreateEvent(
     _In_ BOOLEAN InitialState
     );
 
+/**
+ * Opens an existing event object.
+ *
+ * @param EventHandle Pointer to a handle that receives the event object.
+ * @param DesiredAccess Specifies the desired access for the event object.
+ * @param ObjectAttributes Pointer to the object attributes structure.
+ * @return NTSTATUS code indicating success or failure of the operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -355,6 +741,13 @@ NtOpenEvent(
     _In_ POBJECT_ATTRIBUTES ObjectAttributes
     );
 
+/**
+ * Sets an event object to the signaled state.
+ *
+ * @param EventHandle Handle to the event object.
+ * @param PreviousState Optional pointer to a variable that receives the previous state of the event.
+ * @return NTSTATUS code indicating success or failure of the operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -363,6 +756,12 @@ NtSetEvent(
     _Out_opt_ PLONG PreviousState
     );
 
+/**
+ * Sets an event object to the signaled state and boosts the priority of waiting threads.
+ *
+ * @param EventHandle Handle to the event object.
+ * @return NTSTATUS code indicating success or failure of the operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -370,6 +769,12 @@ NtSetEventBoostPriority(
     _In_ HANDLE EventHandle
     );
 
+/**
+ * Clears an event object to the non-signaled state.
+ *
+ * @param EventHandle Handle to the event object.
+ * @return NTSTATUS code indicating success or failure of the operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -377,6 +782,13 @@ NtClearEvent(
     _In_ HANDLE EventHandle
     );
 
+/**
+ * Resets an event object to the non-signaled state.
+ *
+ * @param EventHandle Handle to the event object.
+ * @param PreviousState Optional pointer to a variable that receives the previous state of the event.
+ * @return NTSTATUS code indicating success or failure of the operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -385,6 +797,13 @@ NtResetEvent(
     _Out_opt_ PLONG PreviousState
     );
 
+/**
+ * Sets an event object to the signaled state and then resets it to the non-signaled state.
+ *
+ * @param EventHandle Handle to the event object.
+ * @param PreviousState Optional pointer to a variable that receives the previous state of the event.
+ * @return NTSTATUS code indicating success or failure of the operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -393,6 +812,16 @@ NtPulseEvent(
     _Out_opt_ PLONG PreviousState
     );
 
+/**
+ * Queries information about an event object.
+ *
+ * @param EventHandle Handle to the event object.
+ * @param EventInformationClass Specifies the type of information to query.
+ * @param EventInformation Pointer to a buffer that receives the event information.
+ * @param EventInformationLength Specifies the size of the buffer.
+ * @param ReturnLength Optional pointer to a variable that receives the size of the data returned.
+ * @return NTSTATUS code indicating success or failure of the operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -404,10 +833,20 @@ NtQueryEvent(
     _Out_opt_ PULONG ReturnLength
     );
 
+//
 // Event Pair
+//
 
 #define EVENT_PAIR_ALL_ACCESS (STANDARD_RIGHTS_REQUIRED | SYNCHRONIZE)
 
+/**
+ * Creates an event pair object.
+ *
+ * @param EventPairHandle A pointer to a handle that receives the event pair object.
+ * @param DesiredAccess The access mask that specifies the desired access rights.
+ * @param ObjectAttributes Optional. A pointer to an object attributes structure.
+ * @return NTSTATUS Returns the status of the create operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -416,7 +855,15 @@ NtCreateEventPair(
     _In_ ACCESS_MASK DesiredAccess,
     _In_opt_ POBJECT_ATTRIBUTES ObjectAttributes
     );
-
+    
+/**
+ * Opens an existing event pair object.
+ *
+ * @param EventPairHandle A pointer to a handle that receives the event pair object.
+ * @param DesiredAccess The access mask that specifies the desired access rights.
+ * @param ObjectAttributes A pointer to an object attributes structure.
+ * @return NTSTATUS Returns the status of the open operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -426,6 +873,12 @@ NtOpenEventPair(
     _In_ POBJECT_ATTRIBUTES ObjectAttributes
     );
 
+/**
+ * Sets the low event in an event pair object.
+ *
+ * @param EventPairHandle The handle to the event pair object.
+ * @return NTSTATUS Returns the status of the set operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -433,6 +886,12 @@ NtSetLowEventPair(
     _In_ HANDLE EventPairHandle
     );
 
+/**
+ * Sets the high event in an event pair object.
+ *
+ * @param EventPairHandle The handle to the event pair object.
+ * @return NTSTATUS Returns the status of the set operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -440,6 +899,12 @@ NtSetHighEventPair(
     _In_ HANDLE EventPairHandle
     );
 
+/**
+ * Waits for the low event in an event pair object to be set.
+ *
+ * @param EventPairHandle The handle to the event pair object.
+ * @return NTSTATUS Returns the status of the wait operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -447,6 +912,12 @@ NtWaitLowEventPair(
     _In_ HANDLE EventPairHandle
     );
 
+/**
+ * Waits for the high event in an event pair object to be set.
+ *
+ * @param EventPairHandle The handle to the event pair object.
+ * @return NTSTATUS Returns the status of the wait operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -454,6 +925,12 @@ NtWaitHighEventPair(
     _In_ HANDLE EventPairHandle
     );
 
+/**
+ * Sets the low event and waits for the high event in an event pair object.
+ *
+ * @param EventPairHandle The handle to the event pair object.
+ * @return NTSTATUS Returns the status of the set and wait operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -461,6 +938,12 @@ NtSetLowWaitHighEventPair(
     _In_ HANDLE EventPairHandle
     );
 
+/**
+ * Sets the high event and waits for the low event in an event pair object.
+ *
+ * @param EventPairHandle The handle to the event pair object.
+ * @return NTSTATUS Returns the status of the set and wait operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -468,7 +951,9 @@ NtSetHighWaitLowEventPair(
     _In_ HANDLE EventPairHandle
     );
 
+//
 // Mutant
+//
 
 #ifndef MUTANT_QUERY_STATE
 #define MUTANT_QUERY_STATE 0x0001
@@ -534,7 +1019,9 @@ NtQueryMutant(
     _Out_opt_ PULONG ReturnLength
     );
 
+//
 // Semaphore
+//
 
 #ifndef SEMAPHORE_QUERY_STATE
 #define SEMAPHORE_QUERY_STATE 0x0001
@@ -1119,31 +1606,106 @@ typedef enum _WORKERFACTORYINFOCLASS
     MaxWorkerFactoryInfoClass
 } WORKERFACTORYINFOCLASS, *PWORKERFACTORYINFOCLASS;
 
+/**
+ * Contains basic information about a worker factory.
+ */
 typedef struct _WORKER_FACTORY_BASIC_INFORMATION
 {
+    /**
+    * The timeout period for the worker factory.
+    */
     LARGE_INTEGER Timeout;
+    /**
+    * The retry timeout period for the worker factory.
+    */
     LARGE_INTEGER RetryTimeout;
+    /**
+    * The idle timeout period for the worker factory.
+    */
     LARGE_INTEGER IdleTimeout;
+    /**
+    * Indicates whether the worker factory is paused.
+    */
     BOOLEAN Paused;
+    /**
+    * Indicates whether the timer is set for the worker factory.
+    */
     BOOLEAN TimerSet;
+    /**
+    * Indicates whether the worker factory is queued to an executive worker.
+    */
     BOOLEAN QueuedToExWorker;
+    /**
+    * Indicates whether the worker factory may create new workers.
+    */
     BOOLEAN MayCreate;
+    /**
+    * Indicates whether worker creation is in progress.
+    */
     BOOLEAN CreateInProgress;
+    /**
+    * Indicates whether the worker factory is inserted into a queue.
+    */
     BOOLEAN InsertedIntoQueue;
+    /**
+    * Indicates whether the worker factory is shut down.
+    */
     BOOLEAN Shutdown;
+    /**
+    * The number of bindings in the worker factory.
+    */
     ULONG BindingCount;
+    /**
+    * The minimum number of threads in the worker factory.
+    */
     ULONG ThreadMinimum;
+    /**
+    * The maximum number of threads in the worker factory.
+    */
     ULONG ThreadMaximum;
+    /**
+    * The number of pending workers in the worker factory.
+    */
     ULONG PendingWorkerCount;
+    /**
+    * The number of waiting workers in the worker factory.
+    */
     ULONG WaitingWorkerCount;
+    /**
+    * The total number of workers in the worker factory.
+    */
     ULONG TotalWorkerCount;
+    /**
+    * The release count for the worker factory.
+    */
     ULONG ReleaseCount;
+    /**
+    * The goal for infinite wait in the worker factory.
+    */
     LONGLONG InfiniteWaitGoal;
+    /**
+    * A pointer to the start routine for the worker factory.
+    */
     PVOID StartRoutine;
+    /**
+    * A pointer to the start parameter for the worker factory.
+    */
     PVOID StartParameter;
+    /**
+    * The process ID associated with the worker factory.
+    */
     HANDLE ProcessId;
+    /**
+    * The stack reserve size for the worker factory.
+    */
     SIZE_T StackReserve;
+    /**
+    * The stack commit size for the worker factory.
+    */
     SIZE_T StackCommit;
+    /**
+    * The status of the last thread creation in the worker factory.
+    */
     NTSTATUS LastThreadCreationStatus;
 } WORKER_FACTORY_BASIC_INFORMATION, *PWORKER_FACTORY_BASIC_INFORMATION;
 
@@ -1151,6 +1713,21 @@ typedef struct _WORKER_FACTORY_BASIC_INFORMATION
 
 #if (PHNT_VERSION >= PHNT_VISTA)
 
+/**
+ * Creates a worker factory object.
+ * 
+ * @param WorkerFactoryHandleReturn A pointer to a handle that will receive the worker factory handle.
+ * @param DesiredAccess The desired access for the worker factory.
+ * @param ObjectAttributes Optional object attributes.
+ * @param CompletionPortHandle A handle to the completion port.
+ * @param WorkerProcessHandle A handle to the worker process.
+ * @param StartRoutine A pointer to the start routine.
+ * @param StartParameter Optional start parameter.
+ * @param MaxThreadCount Optional maximum thread count.
+ * @param StackReserve Optional stack reserve size.
+ * @param StackCommit Optional stack commit size.
+ * @return NTSTATUS The status of the operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -1167,6 +1744,16 @@ NtCreateWorkerFactory(
     _In_opt_ SIZE_T StackCommit
     );
 
+/**
+ * Queries information about a worker factory.
+ * 
+ * @param WorkerFactoryHandle A handle to the worker factory.
+ * @param WorkerFactoryInformationClass The information class to query.
+ * @param WorkerFactoryInformation A pointer to a buffer that receives the information.
+ * @param WorkerFactoryInformationLength The length of the buffer.
+ * @param ReturnLength Optional pointer to a variable that receives the length of the information.
+ * @return NTSTATUS The status of the operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -1178,6 +1765,15 @@ NtQueryInformationWorkerFactory(
     _Out_opt_ PULONG ReturnLength
     );
 
+/**
+ * Sets information for a worker factory.
+ * 
+ * @param WorkerFactoryHandle A handle to the worker factory.
+ * @param WorkerFactoryInformationClass The information class to set.
+ * @param WorkerFactoryInformation A pointer to a buffer that contains the information.
+ * @param WorkerFactoryInformationLength The length of the buffer.
+ * @return NTSTATUS The status of the operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -1188,6 +1784,13 @@ NtSetInformationWorkerFactory(
     _In_ ULONG WorkerFactoryInformationLength
     );
 
+/**
+ * Shuts down a worker factory.
+ * 
+ * @param WorkerFactoryHandle A handle to the worker factory.
+ * @param PendingWorkerCount A pointer to a variable that receives the number of pending workers.
+ * @return NTSTATUS The status of the operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -1196,6 +1799,12 @@ NtShutdownWorkerFactory(
     _Inout_ volatile LONG *PendingWorkerCount
     );
 
+/**
+ * Releases a worker from the worker factory.
+ * 
+ * @param WorkerFactoryHandle A handle to the worker factory.
+ * @return NTSTATUS The status of the operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -1203,6 +1812,12 @@ NtReleaseWorkerFactoryWorker(
     _In_ HANDLE WorkerFactoryHandle
     );
 
+/**
+ * Notifies that a worker is ready in the worker factory.
+ * 
+ * @param WorkerFactoryHandle A handle to the worker factory.
+ * @return NTSTATUS The status of the operation.
+ */
 NTSYSCALLAPI
 NTSTATUS
 NTAPI
@@ -1645,87 +2260,325 @@ typedef struct _SYSTEM_PROCESSOR_INFORMATION
 #define KF_CAT_BIT 0x2C
 #define KF_XFD_BIT 0x37
 
+/**
+ * The SYSTEM_PERFORMANCE_INFORMATION structure contains statistics and performance information of the operating system.
+ */
 typedef struct _SYSTEM_PERFORMANCE_INFORMATION
 {
-    LARGE_INTEGER IdleProcessTime;
-    LARGE_INTEGER IoReadTransferCount;
-    LARGE_INTEGER IoWriteTransferCount;
-    LARGE_INTEGER IoOtherTransferCount;
+    /**
+    * Total time the system idle process has been running.
+    */
+    ULARGE_INTEGER IdleProcessTime;
+    /**
+    * Total number of bytes read in I/O operations.
+    */
+    ULARGE_INTEGER IoReadTransferCount;
+    /**
+    * Total number of bytes written in I/O operations.
+    */
+    ULARGE_INTEGER IoWriteTransferCount;
+    /**
+    * Total number of bytes transferred in non-read/write I/O operations.
+    */
+    ULARGE_INTEGER IoOtherTransferCount;
+    /**
+    * Total number of read I/O operations.
+    */
     ULONG IoReadOperationCount;
+    /**
+    * Total number of write operations.
+    */
     ULONG IoWriteOperationCount;
+    /**
+    * Total number of other I/O operations.
+    */
     ULONG IoOtherOperationCount;
+    /**
+    * Total number of available pages in the system.
+    */
     ULONG AvailablePages;
+    /**
+    * Total number of committed pages in the system.
+    */
     ULONG CommittedPages;
+    /**
+    * Maximum number of pages that can be committed.
+    */
     ULONG CommitLimit;
+    /**
+    * Peak number of previously committed pages.
+    */
     ULONG PeakCommitment;
+    /**
+    * Total number of page faults.
+    */
     ULONG PageFaultCount;
+    /**
+    * Total number of copy-on-write operations.
+    */
     ULONG CopyOnWriteCount;
+    /**
+    * Total number of page transitions.
+    */
     ULONG TransitionCount;
+    /**
+    * Total number of cache transitions.
+    */
     ULONG CacheTransitionCount;
+    /**
+    * Total number of demand zero pages.
+    */
     ULONG DemandZeroCount;
+    /**
+    * Total number of page reads.
+    */
     ULONG PageReadCount;
+    /**
+    * Total number of I/O operations for page reads.
+    */
     ULONG PageReadIoCount;
+    /**
+    * Total number of cache reads.
+    */
     ULONG CacheReadCount;
+    /**
+    * Total number of I/O operations for cache reads.
+    */
     ULONG CacheIoCount;
+    /**
+    * Total number of dirty pages written.
+    */
     ULONG DirtyPagesWriteCount;
+    /**
+    * Total number of I/O operations for dirty page writes.
+    */
     ULONG DirtyWriteIoCount;
+    /**
+    * Total number of mapped pages written.
+    */
     ULONG MappedPagesWriteCount;
+    /**
+    * Total number of I/O operations for mapped page writes.
+    */
     ULONG MappedWriteIoCount;
+    /**
+    * Total number of pages in the paged pool.
+    */
     ULONG PagedPoolPages;
+    /**
+    * Total number of pages in the non-paged pool.
+    */
     ULONG NonPagedPoolPages;
+    /**
+    * Total number of allocations from the paged pool.
+    */
     ULONG PagedPoolAllocs;
+    /**
+    * Total number of frees from the paged pool.
+    */
     ULONG PagedPoolFrees;
+    /**
+    * Total number of allocations from the non-paged pool.
+    */
     ULONG NonPagedPoolAllocs;
+    /**
+    * Total number of frees from the non-paged pool.
+    */
     ULONG NonPagedPoolFrees;
+    /**
+    * Total number of free system page table entries.
+    */
     ULONG FreeSystemPtes;
+    /**
+    * Total number of resident system code pages.
+    */
     ULONG ResidentSystemCodePage;
+    /**
+    * Total number of system driver pages.
+    */
     ULONG TotalSystemDriverPages;
+    /**
+    * Total number of system code pages.
+    */
     ULONG TotalSystemCodePages;
+    /**
+    * Number of non-paged pool lookaside hits.
+    */
     ULONG NonPagedPoolLookasideHits;
+    /**
+    * Number of paged pool lookaside hits.
+    */
     ULONG PagedPoolLookasideHits;
+    /**
+    * Number of available pages in the paged pool.
+    */
     ULONG AvailablePagedPoolPages;
+    /**
+    * Number of resident system cache pages.
+    */
     ULONG ResidentSystemCachePage;
+    /**
+    * Number of resident paged pool pages.
+    */
     ULONG ResidentPagedPoolPage;
+    /**
+    * Number of resident system driver pages.
+    */
     ULONG ResidentSystemDriverPage;
+    /**
+    * Number of fast cache reads without wait.
+    */
     ULONG CcFastReadNoWait;
+    /**
+    * Number of fast cache reads with wait.
+    */
     ULONG CcFastReadWait;
+    /**
+    * Number of fast cache reads with resource miss.
+    */
     ULONG CcFastReadResourceMiss;
+    /**
+    * Number of fast cache reads not possible.
+    */
     ULONG CcFastReadNotPossible;
+    /**
+    * Number of fast MDL reads without wait.
+    */
     ULONG CcFastMdlReadNoWait;
+    /**
+    * Number of fast MDL reads with wait.
+    */
     ULONG CcFastMdlReadWait;
+    /**
+    * Number of fast MDL reads with resource miss.
+    */
     ULONG CcFastMdlReadResourceMiss;
+    /**
+    * Number of fast MDL reads not possible.
+    */
     ULONG CcFastMdlReadNotPossible;
+    /**
+    * Number of cache map data without wait.
+    */
     ULONG CcMapDataNoWait;
+    /**
+    * Number of cache map data with wait.
+    */
     ULONG CcMapDataWait;
+    /**
+    * Number of cache map data without wait miss.
+    */
     ULONG CcMapDataNoWaitMiss;
+    /**
+    * Number of cache map data with wait miss.
+    */
     ULONG CcMapDataWaitMiss;
+    /**
+    * Number of pinned mapped data.
+    */
     ULONG CcPinMappedDataCount;
+    /**
+    * Number of cache pin reads without wait.
+    */
     ULONG CcPinReadNoWait;
+    /**
+    * Number of cache pin reads with wait.
+    */
     ULONG CcPinReadWait;
+    /**
+    * Number of cache pin reads without wait miss.
+    */
     ULONG CcPinReadNoWaitMiss;
+    /**
+    * Number of cache pin reads with wait miss.
+    */
     ULONG CcPinReadWaitMiss;
+    /**
+    * Number of cache copy reads without wait.
+    */
     ULONG CcCopyReadNoWait;
+    /**
+    * Number of cache copy reads with wait.
+    */
     ULONG CcCopyReadWait;
+    /**
+    * Number of cache copy reads without wait miss.
+    */
     ULONG CcCopyReadNoWaitMiss;
+    /**
+    * Number of cache copy reads with wait miss.
+    */
     ULONG CcCopyReadWaitMiss;
+    /**
+    * Number of cache MDL reads without wait.
+    */
     ULONG CcMdlReadNoWait;
+    /**
+    * Number of cache MDL reads with wait.
+    */
     ULONG CcMdlReadWait;
+    /**
+    * Number of cache MDL reads without wait miss.
+    */
     ULONG CcMdlReadNoWaitMiss;
+    /**
+    * Number of cache MDL reads with wait miss.
+    */
     ULONG CcMdlReadWaitMiss;
+    /**
+    * Number of cache read-ahead I/Os.
+    */
     ULONG CcReadAheadIos;
+    /**
+    * Number of cache lazy write I/Os.
+    */
     ULONG CcLazyWriteIos;
+    /**
+    * Number of cache lazy write pages.
+    */
     ULONG CcLazyWritePages;
+
+    /**
+    * Number of cache data flushes.
+    */
     ULONG CcDataFlushes;
+    /**
+    * Number of cache data pages.
+    */
     ULONG CcDataPages;
+    /**
+    * Number of context switches.
+    */
     ULONG ContextSwitches;
+    /**
+    * Number of first-level TB fills.
+    */
     ULONG FirstLevelTbFills;
+    /**
+    * Number of second-level TB fills.
+    */
     ULONG SecondLevelTbFills;
+    /**
+    * Number of system calls.
+    */
     ULONG SystemCalls;
-    ULONGLONG CcTotalDirtyPages; // since THRESHOLD
-    ULONGLONG CcDirtyPageThreshold; // since THRESHOLD
-    LONGLONG ResidentAvailablePages; // since THRESHOLD
-    ULONGLONG SharedCommittedPages; // since THRESHOLD
-} SYSTEM_PERFORMANCE_INFORMATION, *PSYSTEM_PERFORMANCE_INFORMATION;
+    /**
+    * Total number of dirty pages. // since threshold
+    */
+    ULONGLONG CcTotalDirtyPages;
+    /**
+    * Dirty page threshold. // since threshold
+    */
+    ULONGLONG CcDirtyPageThreshold;
+    /**
+    * Available resident pages. // since threshold
+    */
+    LONGLONG ResidentAvailablePages;
+    /**
+    * Shared committed pages. // since threshold
+    */
+    ULONGLONG SharedCommittedPages;
+} SYSTEM_PERFORMANCE_INFORMATION, * PSYSTEM_PERFORMANCE_INFORMATION;
 
 typedef struct _SYSTEM_TIMEOFDAY_INFORMATION
 {

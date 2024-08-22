@@ -386,6 +386,44 @@ BOOLEAN PhGetWindowRect(
     return TRUE;
 }
 
+BOOLEAN PhIsHungAppWindow(
+    _In_ HWND WindowHandle,
+    _In_ HDESK DesktopHandle
+    )
+{
+    return !!IsHungAppWindow(WindowHandle);
+}
+
+BOOLEAN PhCheckWindowThreadDesktop(
+    _In_ HWND WindowHandle,
+    _In_ HANDLE ThreadId
+    )
+{
+    typedef INT32 (WINAPI* CheckWindowThreadDesktop)(
+        _In_ HWND WindowHandle,
+        _In_ ULONG ThreadId
+        );
+    static PH_INITONCE initOnce = PH_INITONCE_INIT;
+    static CheckWindowThreadDesktop CheckWindowThreadDesktop_I = NULL;
+
+    if (PhBeginInitOnce(&initOnce))
+    {
+        PVOID baseAddress;
+
+        if (baseAddress = PhLoadLibrary(L"user32.dll"))
+        {
+            CheckWindowThreadDesktop_I = PhGetDllBaseProcedureAddress(baseAddress, "CheckWindowThreadDesktop", 0);
+        }
+
+        PhEndInitOnce(&initOnce);
+    }
+
+    if (!CheckWindowThreadDesktop_I)
+        return FALSE;
+
+    return CheckWindowThreadDesktop_I(WindowHandle, HandleToUlong(ThreadId));
+}
+
 LONG PhGetDpi(
     _In_ LONG Number,
     _In_ LONG DpiValue
@@ -1553,15 +1591,18 @@ VOID PhSetClipboardString(
     HANDLE data;
     PVOID memory;
 
-    data = GlobalAlloc(GMEM_MOVEABLE, String->Length + sizeof(UNICODE_NULL));
-    memory = GlobalLock(data);
+    if (data = GlobalAlloc(GMEM_MOVEABLE, String->Length + sizeof(UNICODE_NULL)))
+    {
+        if (memory = GlobalLock(data))
+        {
+            memcpy(memory, String->Buffer, String->Length);
+            *(PWCHAR)PTR_ADD_OFFSET(memory, String->Length) = UNICODE_NULL;
 
-    memcpy(memory, String->Buffer, String->Length);
-    *(PWCHAR)PTR_ADD_OFFSET(memory, String->Length) = UNICODE_NULL;
+            GlobalUnlock(memory);
+        }
 
-    GlobalUnlock(memory);
-
-    PhpSetClipboardData(WindowHandle, CF_UNICODETEXT, data);
+        PhpSetClipboardData(WindowHandle, CF_UNICODETEXT, data);
+    }
 }
 
 PPH_STRING PhGetClipboardString(
@@ -1781,7 +1822,7 @@ BOOLEAN PhModalPropertySheet(
 
     while (result = GetMessage(&message, NULL, 0, 0))
     {
-        if (result == -1)
+        if (result == INT_ERROR)
             break;
 
         if (message.message == WM_KEYDOWN /*|| message.message == WM_KEYUP*/) // forward key messages (dmex)
@@ -2770,7 +2811,8 @@ NTSTATUS PhGetProcessGuiResources(
 
 _Success_(return)
 BOOLEAN PhGetThreadWin32Thread(
-    _In_ HANDLE ThreadId
+    _In_ HANDLE ThreadId,
+    _Out_opt_ PGUITHREADINFO ThreadInfo
     )
 {
     GUITHREADINFO info;
@@ -2780,6 +2822,10 @@ BOOLEAN PhGetThreadWin32Thread(
 
     if (GetGUIThreadInfo(HandleToUlong(ThreadId), &info))
     {
+        if (ThreadInfo)
+        {
+            memcpy(ThreadInfo, &info, sizeof(GUITHREADINFO));
+        }
         return TRUE;
     }
 

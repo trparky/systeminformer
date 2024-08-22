@@ -16,9 +16,9 @@
 #include <kphdyndata.h>
 #include <settings.h>
 #include <json.h>
-#include <phappres.h>
 #include <sistatus.h>
-
+#include <phsettings.h>
+#include <phplug.h>
 #include <ksisup.h>
 
 static PH_STRINGREF DriverExtension = PH_STRINGREF_INIT(L".sys");
@@ -85,7 +85,7 @@ VOID PhShowKsiStatus(
 {
     KPH_PROCESS_STATE processState;
 
-    if (!PhGetIntegerSetting(L"KsiEnableWarnings") || PhStartupParameters.PhSvc)
+    if (!PhEnableKsiWarnings || PhStartupParameters.PhSvc)
         return;
 
     processState = KphGetCurrentProcessState();
@@ -162,7 +162,7 @@ VOID PhpShowKsiMessage(
     PPH_STRING messageString;
     ULONG processState;
 
-    if (!Force && !PhGetIntegerSetting(L"KsiEnableWarnings") || PhStartupParameters.PhSvc)
+    if (!Force && !PhEnableKsiWarnings || PhStartupParameters.PhSvc)
         return;
 
     versionString = PhGetApplicationVersionString(FALSE);
@@ -234,7 +234,7 @@ VOID PhpShowKsiMessage(
         PhAppendStringBuilder2(&stringBuilder, L"\r\n");
     }
 
-    if (Force && !PhGetIntegerSetting(L"KsiEnableWarnings"))
+    if (Force && !PhEnableKsiWarnings)
     {
         PhAppendStringBuilder2(&stringBuilder, L"Driver warnings are disabled.");
         PhAppendStringBuilder2(&stringBuilder, L"\r\n");
@@ -377,7 +377,7 @@ NTSTATUS PhRestartSelf(
         PhGetString(commandline),
         NULL,
         NULL,
-        &startupInfo.StartupInfo,
+        &startupInfo,
         PH_CREATE_PROCESS_DEFAULT_ERROR_MODE | PH_CREATE_PROCESS_EXTENDED_STARTUPINFO,
         NULL,
         NULL,
@@ -968,7 +968,7 @@ static HRESULT CALLBACK KsiSplashScreenDialogCallbackProc(
 {
     switch (Notification)
     {
-    case TDN_CREATED:
+    case TDN_DIALOG_CONSTRUCTED:
         {
             NTSTATUS status;
             HANDLE threadHandle;

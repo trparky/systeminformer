@@ -17,29 +17,10 @@
 
 // code from http://msdn.microsoft.com/en-us/library/bb757020.aspx
 
-typedef HPAINTBUFFER (WINAPI* _BeginBufferedPaint)(
-    _In_ HDC hdcTarget,
-    _In_ const RECT *prcTarget,
-    _In_ BP_BUFFERFORMAT dwFormat,
-    _In_ BP_PAINTPARAMS *pPaintParams,
-    _Out_ HDC *phdc
-    );
-
-typedef HRESULT (WINAPI* _EndBufferedPaint)(
-    _In_ HPAINTBUFFER hBufferedPaint,
-    _In_ BOOL fUpdateTarget
-    );
-
-typedef HRESULT (WINAPI* _GetBufferedPaintBits)(
-    _In_ HPAINTBUFFER hBufferedPaint,
-    _Out_ RGBQUAD **ppbBuffer,
-    _Out_ int *pcxRow
-    );
-
 static BOOLEAN ImportsInitialized = FALSE;
-static _BeginBufferedPaint BeginBufferedPaint_I = NULL;
-static _EndBufferedPaint EndBufferedPaint_I = NULL;
-static _GetBufferedPaintBits GetBufferedPaintBits_I = NULL;
+static typeof(&BeginBufferedPaint) BeginBufferedPaint_I = NULL;
+static typeof(&EndBufferedPaint) EndBufferedPaint_I = NULL;
+static typeof(&GetBufferedPaintBits) GetBufferedPaintBits_I = NULL;
 
 static HBITMAP PhpCreateBitmap32(
     _In_ HDC hdc,

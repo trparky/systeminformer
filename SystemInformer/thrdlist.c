@@ -81,8 +81,8 @@ VOID PhInitializeThreadList(
     Context->TreeNewHandle = TreeNewHandle;
 
     PhSetControlTheme(TreeNewHandle, L"explorer");
-    TreeNew_SetCallback(TreeNewHandle, PhpThreadTreeNewCallback, Context);
     TreeNew_SetRedraw(TreeNewHandle, FALSE);
+    TreeNew_SetCallback(TreeNewHandle, PhpThreadTreeNewCallback, Context);
 
     // Default columns
     PhAddTreeNewColumn(TreeNewHandle, PH_THREAD_TREELIST_COLUMN_TID, TRUE, L"TID", 50, PH_ALIGN_RIGHT, 0, DT_RIGHT);
@@ -130,14 +130,15 @@ VOID PhInitializeThreadList(
     PhAddTreeNewColumn(TreeNewHandle, PH_THREAD_TREELIST_COLUMN_IOOTHERBYTES, FALSE, L"I/O other bytes", 50, PH_ALIGN_LEFT, ULONG_MAX, 0);
     PhAddTreeNewColumn(TreeNewHandle, PH_THREAD_TREELIST_COLUMN_LXSSTID, FALSE, L"TID (LXSS)", 50, PH_ALIGN_LEFT, ULONG_MAX, 0);
     PhAddTreeNewColumn(TreeNewHandle, PH_THREAD_TREELIST_COLUMN_POWERTHROTTLING, FALSE, L"Power throttling", 50, PH_ALIGN_LEFT, ULONG_MAX, 0);
-
-    TreeNew_SetRedraw(TreeNewHandle, TRUE);
-    TreeNew_SetTriState(TreeNewHandle, TRUE);
-    TreeNew_SetSort(TreeNewHandle, PH_THREAD_TREELIST_COLUMN_CYCLESDELTA, DescendingSortOrder);
+    PhAddTreeNewColumn(TreeNewHandle, PH_THREAD_TREELIST_COLUMN_CONTAINERID, FALSE, L"Container ID", 50, PH_ALIGN_LEFT, ULONG_MAX, 0);
 
     PhCmInitializeManager(&Context->Cm, TreeNewHandle, PH_THREAD_TREELIST_COLUMN_MAXIMUM, PhpThreadTreeNewPostSortFunction);
-
     PhInitializeTreeNewFilterSupport(&Context->TreeFilterSupport, Context->TreeNewHandle, Context->NodeList);
+
+    TreeNew_SetSort(TreeNewHandle, PH_THREAD_TREELIST_COLUMN_CYCLESDELTA, DescendingSortOrder);
+
+    TreeNew_SetTriState(TreeNewHandle, TRUE);
+    TreeNew_SetRedraw(TreeNewHandle, TRUE);
 }
 
 VOID PhDeleteThreadList(

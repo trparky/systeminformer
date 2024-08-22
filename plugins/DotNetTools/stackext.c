@@ -27,7 +27,7 @@ typedef struct _THREAD_STACK_CONTEXT
     PVOID PredictedEsp;
 
 #ifdef _WIN64
-    BOOLEAN IsWow64;
+    BOOLEAN IsWow64Process;
     BOOLEAN ConnectedToPhSvc;
 #endif
 } THREAD_STACK_CONTEXT, *PTHREAD_STACK_CONTEXT;
@@ -78,7 +78,7 @@ VOID ProcessThreadStackControl(
             context->ThreadId = Control->u.Initializing.ThreadId;
             context->ThreadHandle = Control->u.Initializing.ThreadHandle;
 #if _WIN64
-            PhGetProcessIsWow64(Control->u.Initializing.ProcessHandle, &context->IsWow64);
+            PhGetProcessIsWow64(Control->u.Initializing.ProcessHandle, &context->IsWow64Process);
 #endif
             PhAcquireQueuedLockExclusive(&ContextHashtableLock);
             PhAddItemSimpleHashtable(ContextHashtable, Control->UniqueKey, context);
@@ -157,7 +157,7 @@ VOID ProcessThreadStackControl(
                     );
             }
 #ifdef _WIN64
-            else if (context->IsWow64 && context->ConnectedToPhSvc)
+            else if (context->IsWow64Process && context->ConnectedToPhSvc)
             {
                 PVOID predictedEip;
                 PVOID predictedEbp;
@@ -253,7 +253,7 @@ VOID ProcessThreadStackControl(
             context->Support = CreateClrProcessSupport(context->ProcessId);
 
 #ifdef _WIN64
-            if (context->IsWow64)
+            if (context->IsWow64Process)
                 context->ConnectedToPhSvc = PhUiConnectToPhSvcEx(NULL, Wow64PhSvcMode, FALSE);
 #endif
         }

@@ -956,8 +956,8 @@ BOOLEAN NTAPI PhpServiceTreeNewCallback(
 
             data.TreeNewHandle = hwnd;
             data.MouseEvent = Parameter1;
-            data.DefaultSortColumn = 0;
-            data.DefaultSortOrder = AscendingSortOrder;
+            data.DefaultSortColumn = PHSVTLC_NAME;
+            data.DefaultSortOrder = NoSortOrder;
             PhInitializeTreeNewColumnMenuEx(&data, PH_TN_COLUMN_MENU_SHOW_RESET_SORT);
 
             data.Selection = PhShowEMenu(data.Menu, hwnd, PH_EMENU_SHOW_LEFTRIGHT,

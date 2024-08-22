@@ -1161,9 +1161,9 @@ VOID PhMwpOnCommand(
             PhShowCreateServiceDialog(WindowHandle);
         }
         break;
-    case ID_TOOLS_HIDDENPROCESSES:
+    case ID_TOOLS_ZOMBIEPROCESSES:
         {
-            PhShowHiddenProcessesDialog();
+            PhShowZombieProcessesDialog();
         }
         break;
     case ID_TOOLS_INSPECTEXECUTABLEFILE:
@@ -2803,6 +2803,21 @@ PPH_EMENU PhpCreateComputerMenu(
         PhInsertEMenuItem(menuItem, PhCreateEMenuItem(0, ID_COMPUTER_SHUTDOWN_CRITICAL, L"Shu&t down (Critical)", NULL, NULL), ULONG_MAX);
     }
 
+    if (!PhGetOwnTokenAttributes().Elevated)
+    {
+        PPH_EMENU_ITEM menu;
+
+        if (menu = PhFindEMenuItem(menuItem, PH_EMENU_FIND_DESCEND, NULL, ID_COMPUTER_RESTARTADVOPTIONS))
+        {
+            PhSetDisabledEMenuItem(menu);
+        }
+
+        if (menu = PhFindEMenuItem(menuItem, PH_EMENU_FIND_DESCEND, NULL, ID_COMPUTER_RESTARTFWOPTIONS))
+        {
+            PhSetDisabledEMenuItem(menu);
+        }
+    }
+
     return menuItem;
 }
 
@@ -4101,6 +4116,7 @@ VOID PhShowIconContextMenu(
         Location.x,
         Location.y
         );
+    PostMessage(WindowHandle, WM_NULL, 0, 0);
 
     if (item)
     {
@@ -4225,8 +4241,7 @@ VOID PhShowIconNotification(
     _In_ PWSTR Text
     )
 {
-    if (!PhpShowToastNotification(Title, Text, 10))
-        PhNfShowBalloonTip(Title, Text, 10);
+    PhNfShowBalloonTip(Title, Text, 10);
 }
 
 VOID PhShowDetailsForIconNotification(
@@ -4254,13 +4269,17 @@ VOID PhShowDetailsForIconNotification(
             PPH_SERVICE_ITEM serviceItem;
 
             if (PhMwpLastNotificationDetails.ServiceName &&
-                (serviceItem = PhReferenceServiceItem(PhMwpLastNotificationDetails.ServiceName->Buffer)))
+                (serviceItem = PhReferenceServiceItem(&PhMwpLastNotificationDetails.ServiceName->sr)))
             {
                 ProcessHacker_SelectTabPage(PhMwpServicesPage->Index);
                 ProcessHacker_SelectServiceItem(serviceItem);
                 ProcessHacker_ToggleVisible(TRUE);
 
                 PhDereferenceObject(serviceItem);
+            }
+            else
+            {
+                PhShowStatus(PhMainWndHandle, L"The service does not exist.", STATUS_INVALID_CID, 0);
             }
         }
         break;

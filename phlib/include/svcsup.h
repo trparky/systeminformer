@@ -179,7 +179,7 @@ NTSTATUS
 NTAPI
 PhQueryServiceStatus(
     _In_ SC_HANDLE ServiceHandle,
-    _Inout_ LPSERVICE_STATUS_PROCESS ServiceStatus
+    _Out_ LPSERVICE_STATUS_PROCESS ServiceStatus
     );
 
 PHLIBAPI

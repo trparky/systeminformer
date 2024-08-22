@@ -345,9 +345,9 @@ VOID PhLoadSettingsProcessTreeList(
     PhDereferenceObject(sortSettings);
 
     if (PhGetIntegerSetting(L"EnableInstantTooltips"))
-    {
         SendMessage(TreeNew_GetTooltips(ProcessTreeListHandle), TTM_SETDELAYTIME, TTDT_INITIAL, 0);
-    }
+    else
+        SendMessage(TreeNew_GetTooltips(ProcessTreeListHandle), TTM_SETDELAYTIME, TTDT_AUTOPOP, MAXSHORT);
 
     PhLoadSettingsProcessTreeUpdateMask();
 }
@@ -374,9 +374,9 @@ VOID PhLoadSettingsProcessTreeListEx(
     PhCmLoadSettingsEx(ProcessTreeListHandle, &ProcessTreeListCm, 0, &TreeListSettings->sr, &TreeSortSettings->sr);
 
     if (PhGetIntegerSetting(L"EnableInstantTooltips"))
-    {
         SendMessage(TreeNew_GetTooltips(ProcessTreeListHandle), TTM_SETDELAYTIME, TTDT_INITIAL, 0);
-    }
+    else
+        SendMessage(TreeNew_GetTooltips(ProcessTreeListHandle), TTM_SETDELAYTIME, TTDT_AUTOPOP, MAXSHORT);
 
     PhLoadSettingsProcessTreeUpdateMask();
 }
@@ -399,8 +399,10 @@ VOID PhReloadSettingsProcessTreeList(
     VOID
     )
 {
-    SendMessage(TreeNew_GetTooltips(ProcessTreeListHandle), TTM_SETDELAYTIME, TTDT_INITIAL,
-        PhGetIntegerSetting(L"EnableInstantTooltips") ? 0 : -1);
+    if (PhGetIntegerSetting(L"EnableInstantTooltips"))
+        SendMessage(TreeNew_GetTooltips(ProcessTreeListHandle), TTM_SETDELAYTIME, TTDT_INITIAL, 0);
+    else
+        SendMessage(TreeNew_GetTooltips(ProcessTreeListHandle), TTM_SETDELAYTIME, TTDT_AUTOPOP, MAXSHORT);
 
     PhLoadSettingsProcessTreeUpdateMask();
 }
@@ -1048,14 +1050,14 @@ static VOID PhpUpdateProcessNodeDepStatus(
     _Inout_ PPH_PROCESS_NODE ProcessNode
     )
 {
-    if (!(ProcessNode->ValidMask & PHPN_DEPSTATUS))
+    if (!FlagOn(ProcessNode->ValidMask, PHPN_DEPSTATUS))
     {
         ULONG depStatus = 0;
 
 #ifdef _WIN64
         if (
             PH_IS_REAL_PROCESS_ID(ProcessNode->ProcessItem->ProcessId) &&
-            ProcessNode->ProcessItem->IsWow64 &&
+            ProcessNode->ProcessItem->IsWow64Process &&
             ProcessNode->ProcessItem->IsHandleValid // PROCESS_QUERY_INFORMATION
             )
 #else
@@ -1067,12 +1069,14 @@ static VOID PhpUpdateProcessNodeDepStatus(
         else
         {
             if (ProcessNode->ProcessItem->QueryHandle)
+            {
                 depStatus = PH_PROCESS_DEP_ENABLED | PH_PROCESS_DEP_PERMANENT;
+            }
         }
 
         ProcessNode->DepStatus = depStatus;
 
-        ProcessNode->ValidMask |= PHPN_DEPSTATUS;
+        SetFlag(ProcessNode->ValidMask, PHPN_DEPSTATUS);
     }
 }
 
@@ -1720,7 +1724,12 @@ LONG PhpProcessTreeNewPostSortFunction(
 
 BEGIN_SORT_FUNCTION(Name)
 {
-    sortResult = PhCompareString(processItem1->ProcessName, processItem2->ProcessName, TRUE);
+    sortResult = PhCompareStringWithNullSortOrder(
+        processItem1->ProcessName,
+        processItem2->ProcessName,
+        ProcessTreeListSortOrder,
+        TRUE
+        );
 }
 END_SORT_FUNCTION
 
@@ -1926,10 +1935,7 @@ END_SORT_FUNCTION
 
 BEGIN_SORT_FUNCTION(IoWRate)
 {
-    sortResult = uint64cmp(
-        processItem1->IoWriteDelta.Delta,
-        processItem2->IoWriteDelta.Delta
-        );
+    sortResult = uint64cmp(processItem1->IoWriteDelta.Delta, processItem2->IoWriteDelta.Delta);
 }
 END_SORT_FUNCTION
 
@@ -1968,19 +1974,13 @@ END_SORT_FUNCTION
 
 BEGIN_SORT_FUNCTION(KernelCpuTime)
 {
-    sortResult = uint64cmp(
-        processItem1->KernelTime.QuadPart,
-        processItem2->KernelTime.QuadPart
-        );
+    sortResult = uint64cmp(processItem1->KernelTime.QuadPart, processItem2->KernelTime.QuadPart);
 }
 END_SORT_FUNCTION
 
 BEGIN_SORT_FUNCTION(UserCpuTime)
 {
-    sortResult = uint64cmp(
-        processItem1->UserTime.QuadPart,
-        processItem2->UserTime.QuadPart
-        );
+    sortResult = uint64cmp(processItem1->UserTime.QuadPart, processItem2->UserTime.QuadPart);
 }
 END_SORT_FUNCTION
 
@@ -1992,9 +1992,10 @@ END_SORT_FUNCTION
 
 BEGIN_SORT_FUNCTION(VerifiedSigner)
 {
-    sortResult = PhCompareStringWithNull(
+    sortResult = PhCompareStringWithNullSortOrder(
         processItem1->VerifySignerName,
         processItem2->VerifySignerName,
+        ProcessTreeListSortOrder,
         TRUE
         );
 }
@@ -2019,7 +2020,7 @@ END_SORT_FUNCTION
 
 BEGIN_SORT_FUNCTION(Bits)
 {
-    sortResult = intcmp(processItem1->IsWow64, processItem2->IsWow64);
+    sortResult = uintcmp(processItem1->IsWow64Process, processItem2->IsWow64Process);
 }
 END_SORT_FUNCTION
 
@@ -2036,7 +2037,12 @@ BEGIN_SORT_FUNCTION(WindowTitle)
 {
     PhpUpdateProcessNodeWindow(node1);
     PhpUpdateProcessNodeWindow(node2);
-    sortResult = PhCompareStringWithNull(node1->WindowText, node2->WindowText, TRUE);
+    sortResult = PhCompareStringWithNullSortOrder(
+        node1->WindowText,
+        node2->WindowText,
+        ProcessTreeListSortOrder,
+        TRUE
+        );
 }
 END_SORT_FUNCTION
 
@@ -2236,7 +2242,12 @@ END_SORT_FUNCTION
 
 BEGIN_SORT_FUNCTION(PackageName)
 {
-    sortResult = PhCompareStringWithNullSortOrder(processItem1->PackageFullName, processItem2->PackageFullName, ProcessTreeListSortOrder, TRUE);
+    sortResult = PhCompareStringWithNullSortOrder(
+        processItem1->PackageFullName,
+        processItem2->PackageFullName,
+        ProcessTreeListSortOrder,
+        TRUE
+        );
 }
 END_SORT_FUNCTION
 
@@ -2244,7 +2255,12 @@ BEGIN_SORT_FUNCTION(AppId)
 {
     PhpUpdateProcessNodeAppId(node1);
     PhpUpdateProcessNodeAppId(node2);
-    sortResult = PhCompareStringWithNullSortOrder(node1->AppIdText, node2->AppIdText, ProcessTreeListSortOrder, TRUE);
+    sortResult = PhCompareStringWithNullSortOrder(
+        node1->AppIdText,
+        node2->AppIdText,
+        ProcessTreeListSortOrder,
+        TRUE
+        );
 }
 END_SORT_FUNCTION
 
@@ -2324,7 +2340,12 @@ BEGIN_SORT_FUNCTION(DesktopInfo)
 {
     PhpUpdateProcessNodeDesktopInfo(node1);
     PhpUpdateProcessNodeDesktopInfo(node2);
-    sortResult = PhCompareStringWithNullSortOrder(node1->DesktopInfoText, node2->DesktopInfoText, ProcessTreeListSortOrder, TRUE);
+    sortResult = PhCompareStringWithNullSortOrder(
+        node1->DesktopInfoText,
+        node2->DesktopInfoText,
+        ProcessTreeListSortOrder,
+        TRUE
+        );
 }
 END_SORT_FUNCTION
 
@@ -2378,7 +2399,7 @@ BEGIN_SORT_FUNCTION(Architecture)
     else
         architecture2 = node2->ImageMachine;
 
-    sortResult = uintcmp(architecture1, architecture2);
+    sortResult = ushortcmp(architecture1, architecture2);
 #ifdef _ARM64_
     if (sortResult == 0)
         sortResult = uintcmp(node1->ImageCHPEVersion, node2->ImageCHPEVersion);
@@ -2390,7 +2411,12 @@ BEGIN_SORT_FUNCTION(ErrorMode)
 {
     PhpUpdateProcessNodeErrorMode(node1);
     PhpUpdateProcessNodeErrorMode(node2);
-    sortResult = PhCompareStringWithNullSortOrder(node1->ErrorModeText, node2->ErrorModeText, ProcessTreeListSortOrder, TRUE);
+    sortResult = PhCompareStringWithNullSortOrder(
+        node1->ErrorModeText,
+        node2->ErrorModeText,
+        ProcessTreeListSortOrder,
+        TRUE
+        );
 }
 END_SORT_FUNCTION
 
@@ -2459,7 +2485,12 @@ BEGIN_SORT_FUNCTION(GrantedAccess)
 {
     PhpUpdateProcessNodeGrantedAccess(node1);
     PhpUpdateProcessNodeGrantedAccess(node2);
-    sortResult = PhCompareStringWithNullSortOrder(node1->GrantedAccessText, node2->GrantedAccessText, ProcessTreeListSortOrder, TRUE);
+    sortResult = PhCompareStringWithNullSortOrder(
+        node1->GrantedAccessText,
+        node2->GrantedAccessText,
+        ProcessTreeListSortOrder,
+        TRUE
+        );
 }
 END_SORT_FUNCTION
 
@@ -3688,6 +3719,8 @@ BOOLEAN NTAPI PhpProcessTreeNewCallback(
 
                     if (node->PowerThrottling)
                         PhInitializeStringRef(&getCellText->Text, L"Yes");
+                    else
+                        PhInitializeEmptyStringRef(&getCellText->Text);
                 }
                 break;
             case PHPRTLC_ARCHITECTURE:
@@ -3790,6 +3823,8 @@ BOOLEAN NTAPI PhpProcessTreeNewCallback(
 
                     if (node->PriorityBoost)
                         PhInitializeStringRef(&getCellText->Text, L"Yes");
+                    else
+                        PhInitializeEmptyStringRef(&getCellText->Text);
                 }
                 break;
             case PHPRTLC_CPUAVERAGE:
@@ -3896,7 +3931,7 @@ BOOLEAN NTAPI PhpProcessTreeNewCallback(
                             PhInitFormatS(&format[3], L"%) | ");
                             PhInitFormatU(&format[4], node->TlsBitmapCount - TLS_MINIMUM_AVAILABLE);
                             PhInitFormatS(&format[5], L" (");
-                            PhInitFormatF(&format[6], (node->TlsBitmapCount - TLS_MINIMUM_AVAILABLE) * 100 / TLS_EXPANSION_SLOTS, 2);
+                            PhInitFormatF(&format[6], (node->TlsBitmapCount - TLS_MINIMUM_AVAILABLE) * 100.f / TLS_EXPANSION_SLOTS, 2);
                             PhInitFormatS(&format[7], L"%)");
 
                             PhMoveReference(&node->TlsBitmapDeltaText, PhFormat(format, RTL_NUMBER_OF(format), 0));
@@ -3908,7 +3943,7 @@ BOOLEAN NTAPI PhpProcessTreeNewCallback(
                             // 64 (100%) | 0 (0%)
                             PhInitFormatU(&format[0], node->TlsBitmapCount);
                             PhInitFormatS(&format[1], L" (");
-                            PhInitFormatF(&format[2], node->TlsBitmapCount * 100 / TLS_MINIMUM_AVAILABLE, 2);
+                            PhInitFormatF(&format[2], node->TlsBitmapCount * 100.f / TLS_MINIMUM_AVAILABLE, 2);
                             PhInitFormatS(&format[3], L"%) | ");
                             PhInitFormatU(&format[4], 0);
                             PhInitFormatS(&format[5], L" (");
@@ -3995,6 +4030,8 @@ BOOLEAN NTAPI PhpProcessTreeNewCallback(
                 getNodeColor->BackColor = PhCsColorUIAccessProcesses;
             else if (PhCsUseColorPicoProcesses && processItem->IsSubsystemProcess)
                 getNodeColor->BackColor = PhCsColorPicoProcesses;
+            else if (PhCsUseColorEfficiencyMode && processItem->IsPowerThrottling)
+                getNodeColor->BackColor = PhCsColorEfficiencyMode;
             else if (PhCsUseColorImmersiveProcesses && processItem->IsImmersive)
                 getNodeColor->BackColor = PhCsColorImmersiveProcesses;
             else if (PhCsUseColorDotNet && processItem->IsDotNet)
@@ -4005,7 +4042,7 @@ BOOLEAN NTAPI PhpProcessTreeNewCallback(
                 getNodeColor->BackColor = PhCsColorLowImageCoherency;
             else if (PhCsUseColorBackgroundProcesses && PhIsProcessBackground(processItem->PriorityClass))
                 getNodeColor->BackColor = PhCsColorBackgroundProcesses;
-            else if (PhCsUseColorWow64Processes && processItem->IsWow64)
+            else if (PhCsUseColorWow64Processes && processItem->IsWow64Process)
                 getNodeColor->BackColor = PhCsColorWow64Processes;
             else if (PhCsUseColorJobProcesses && processItem->IsInSignificantJob)
                 getNodeColor->BackColor = PhCsColorJobProcesses;

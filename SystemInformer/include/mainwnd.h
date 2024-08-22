@@ -292,4 +292,11 @@ VOID PhShowNetworkContextMenu(
     _In_ PPH_TREENEW_CONTEXT_MENU ContextMenu
     );
 
+VOID PhServiceListInsertContextMenu(
+    _In_ HWND ParentWindow,
+    _In_ struct _PH_EMENU_ITEM* Menu,
+    _In_ PPH_SERVICE_ITEM* Services,
+    _In_ ULONG NumberOfServices
+    );
+
 #endif

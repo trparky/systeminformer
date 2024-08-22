@@ -135,7 +135,7 @@ typedef struct _KPH_PROCESS_BASIC_INFORMATION
             ULONG VerifiedProcess : 1;
             ULONG SecurelyCreated : 1;
             ULONG Protected : 1;
-            ULONG IsWow64 : 1;
+            ULONG IsWow64Process : 1;
             ULONG IsSubsystemProcess : 1;
             ULONG AllocatedImageName : 1;
             ULONG Reserved : 24;

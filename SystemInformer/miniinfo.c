@@ -1953,13 +1953,18 @@ VOID PhMipHandleListSectionCommand(
             ProcessHacker_SelectTabPage(0);
             PhSelectAndEnsureVisibleProcessNodes((PPH_PROCESS_NODE*)nodes->Items, nodes->Count);
             PhDereferenceObject(nodes);
+
+            if (ProcessGroup->Processes->Count == 1 && i == 0)
+            {
+                PhShowStatus(PhMainWndHandle, L"The process does not exist.", STATUS_INVALID_CID, 0);
+            }
         }
         break;
     }
 }
 
 BOOLEAN PhMipCpuListSectionCallback(
-    _In_ struct _PH_MINIINFO_LIST_SECTION *ListSection,
+    _In_ PPH_MINIINFO_LIST_SECTION ListSection,
     _In_ PH_MINIINFO_LIST_SECTION_MESSAGE Message,
     _In_opt_ PVOID Parameter1,
     _In_opt_ PVOID Parameter2
@@ -2086,7 +2091,7 @@ int __cdecl PhMipCpuListSectionNodeCompareFunction(
 }
 
 BOOLEAN PhMipCommitListSectionCallback(
-    _In_ struct _PH_MINIINFO_LIST_SECTION *ListSection,
+    _In_ PPH_MINIINFO_LIST_SECTION ListSection,
     _In_ PH_MINIINFO_LIST_SECTION_MESSAGE Message,
     _In_opt_ PVOID Parameter1,
     _In_opt_ PVOID Parameter2
@@ -2195,7 +2200,7 @@ int __cdecl PhMipCommitListSectionNodeCompareFunction(
 }
 
 BOOLEAN PhMipPhysicalListSectionCallback(
-    _In_ struct _PH_MINIINFO_LIST_SECTION *ListSection,
+    _In_ PPH_MINIINFO_LIST_SECTION ListSection,
     _In_ PH_MINIINFO_LIST_SECTION_MESSAGE Message,
     _In_opt_ PVOID Parameter1,
     _In_opt_ PVOID Parameter2
@@ -2306,7 +2311,7 @@ int __cdecl PhMipPhysicalListSectionNodeCompareFunction(
 }
 
 BOOLEAN PhMipIoListSectionCallback(
-    _In_ struct _PH_MINIINFO_LIST_SECTION *ListSection,
+    _In_ PPH_MINIINFO_LIST_SECTION ListSection,
     _In_ PH_MINIINFO_LIST_SECTION_MESSAGE Message,
     _In_opt_ PVOID Parameter1,
     _In_opt_ PVOID Parameter2

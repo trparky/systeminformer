@@ -103,7 +103,7 @@ PVOID PhCreateJsonParserEx(
         jsonObject = json_tokener_parse_ex(
             tokenerObject,
             jsonStringUtf8->Buffer,
-            jsonStringUtf8->Length
+            (INT)jsonStringUtf8->Length
             );
         PhDereferenceObject(jsonStringUtf8);
     }
@@ -124,7 +124,7 @@ PVOID PhCreateJsonParserEx(
         jsonObject = json_tokener_parse_ex(
             tokenerObject,
             jsonStringUtf8->Buffer,
-            jsonStringUtf8->Length
+            (INT)jsonStringUtf8->Length
             );
     }
 
@@ -445,47 +445,69 @@ NTSTATUS PhSaveJsonObjectToFile(
     _In_ PVOID Object
     )
 {
-    INT json_flags = JSON_C_TO_STRING_PRETTY;
+    static PH_STRINGREF extension = PH_STRINGREF_INIT(L".lock");
     NTSTATUS status;
     HANDLE fileHandle;
-    IO_STATUS_BLOCK isb;
+    PPH_STRING fileName;
     size_t json_length;
     PCSTR json_string;
 
     json_string = json_object_to_json_string_length(
         Object,
-        json_flags,
+        0, // JSON_C_TO_STRING_PRETTY
         &json_length
         );
 
     if (json_length == 0)
-    {
         return STATUS_UNSUCCESSFUL;
-    }
+
+    // Create a temporary filename.
+
+    fileName = PhGetBaseNameChangeExtension(FileName, &extension);
+
+    if (PhIsNullOrEmptyString(fileName))
+        return STATUS_UNSUCCESSFUL;
+
+    // Create the temporary file.
 
     status = PhCreateFile(
         &fileHandle,
-        FileName,
+        &fileName->sr,
         FILE_GENERIC_WRITE,
         FILE_ATTRIBUTE_NORMAL,
-        FILE_SHARE_READ,
+        FILE_SHARE_NONE,
         FILE_OVERWRITE_IF,
         FILE_NON_DIRECTORY_FILE | FILE_SYNCHRONOUS_IO_NONALERT
+        );
+
+    PhDereferenceObject(fileName);
+
+    if (!NT_SUCCESS(status))
+        return status;
+
+    // Write the json objects to the file.
+
+    status = PhWriteFile(
+        fileHandle,
+        (PVOID)json_string,
+        (ULONG)json_length,
+        NULL
         );
 
     if (!NT_SUCCESS(status))
         return status;
 
-    status = NtWriteFile(
+    // Flush the buffers.
+
+    PhFlushBuffersFile(fileHandle);
+
+    // Atomically update the settings file.
+
+    status = PhSetFileRename(
         fileHandle,
         NULL,
-        NULL,
-        NULL,
-        &isb,
-        (PVOID)json_string,
-        (ULONG)json_length,
-        NULL,
-        NULL
+        TRUE,
+        FileName
         );
 
     NtClose(fileHandle);
@@ -561,7 +583,9 @@ NTSTATUS PhLoadXmlObjectFromFile(
         if (mxmlGetType(currentNode) == MXML_ELEMENT)
         {
             if (XmlRootObject)
+            {
                 *XmlRootObject = currentNode;
+            }
 
             return STATUS_SUCCESS;
         }
@@ -578,8 +602,10 @@ NTSTATUS PhSaveXmlObjectToFile(
     _In_opt_ PVOID XmlSaveCallback
     )
 {
+    static PH_STRINGREF extension = PH_STRINGREF_INIT(L".lock");
     NTSTATUS status;
     HANDLE fileHandle;
+    PPH_STRING fileName;
 
     // Create the directory if it does not exist.
 
@@ -588,23 +614,49 @@ NTSTATUS PhSaveXmlObjectToFile(
     if (!NT_SUCCESS(status))
         return status;
 
+    // Create a temporary filename.
+
+    fileName = PhGetBaseNameChangeExtension(FileName, &extension);
+
+    // Create the temporary file.
+
     status = PhCreateFile(
         &fileHandle,
-        FileName,
-        FILE_GENERIC_WRITE,
+        &fileName->sr,
+        FILE_GENERIC_WRITE | DELETE,
         FILE_ATTRIBUTE_NORMAL,
-        FILE_SHARE_READ,
+        FILE_SHARE_NONE,
         FILE_OVERWRITE_IF,
         FILE_NON_DIRECTORY_FILE | FILE_SYNCHRONOUS_IO_NONALERT
         );
 
+    // Cleanup the temporary filename.
+
+    PhDereferenceObject(fileName);
+
     if (!NT_SUCCESS(status))
         return status;
 
+    // Save the settings.
+
     if (mxmlSaveFd(XmlRootObject, fileHandle, XmlSaveCallback) == INT_ERROR)
     {
-        status = STATUS_UNSUCCESSFUL;
+        NtClose(fileHandle);
+        return STATUS_UNSUCCESSFUL;
     }
+
+    // Flush the buffers.
+
+    PhFlushBuffersFile(fileHandle);
+
+    // Atomically replace the destination file.
+
+    status = PhSetFileRename(
+        fileHandle,
+        NULL,
+        TRUE,
+        FileName
+        );
 
     NtClose(fileHandle);
 

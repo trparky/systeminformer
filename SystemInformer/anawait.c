@@ -32,7 +32,7 @@
 typedef struct _ANALYZE_WAIT_CONTEXT
 {
     BOOLEAN Found;
-    BOOLEAN IsWow64;
+    BOOLEAN IsWow64Process;
     HANDLE ProcessId;
     HANDLE ThreadId;
     HANDLE ProcessHandle;
@@ -69,7 +69,7 @@ PPH_STRING PhpaGetHandleString(
 
 VOID PhpGetWfmoInformation(
     _In_ HANDLE ProcessHandle,
-    _In_ BOOLEAN IsWow64,
+    _In_ BOOLEAN IsWow64Process,
     _In_ ULONG NumberOfHandles,
     _In_ PHANDLE AddressOfHandles,
     _In_ WAIT_TYPE WaitType,
@@ -872,7 +872,7 @@ PPH_STRING PhpaGetHandleString(
 
 VOID PhpGetWfmoInformation(
     _In_ HANDLE ProcessHandle,
-    _In_ BOOLEAN IsWow64,
+    _In_ BOOLEAN IsWow64Process,
     _In_ ULONG NumberOfHandles,
     _In_ PHANDLE AddressOfHandles,
     _In_ WAIT_TYPE WaitType,
@@ -889,7 +889,7 @@ VOID PhpGetWfmoInformation(
     if (NumberOfHandles <= MAXIMUM_WAIT_OBJECTS)
     {
 #ifdef _WIN64
-        if (IsWow64)
+        if (IsWow64Process)
         {
             ULONG handles32[MAXIMUM_WAIT_OBJECTS];
 

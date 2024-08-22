@@ -57,6 +57,13 @@
 #define FILE_OPEN_NO_RECALL                 0x00400000
 #define FILE_OPEN_FOR_FREE_SPACE_QUERY      0x00800000
 
+// Sharing Mode
+
+#define FILE_SHARE_NONE                 0x00000000  
+#define FILE_SHARE_READ                 0x00000001  
+#define FILE_SHARE_WRITE                0x00000002  
+#define FILE_SHARE_DELETE               0x00000004
+
 // Extended create/open flags
 
 #define FILE_CONTAINS_EXTENDED_CREATE_INFORMATION   0x10000000
@@ -311,36 +318,106 @@ typedef enum _FILE_INFORMATION_CLASS
 
 // NtQueryInformationFile/NtSetInformationFile types
 
+/**
+ * The FILE_BASIC_INFORMATION structure contains timestamps and basic attributes of a file.
+ *
+ * @remarks The FILE_ATTRIBUTE_NORMAL flag cannot be set or returned in combination with any other attributes. All other FileAttributes values override this attribute.
+ * If you specify a value of zero, the NtSetInformationFile function keeps a file's current time.
+ * The file system does not update these members when values are set to -1, time stamp updates can be restored by setting the appropriate member(s) to -2.
+ */
 typedef struct _FILE_BASIC_INFORMATION
 {
+    /**
+    * Specifies the time that the file was created.
+    */
     LARGE_INTEGER CreationTime;
+    /**
+    * Specifies the time that the file was last accessed.
+    */
     LARGE_INTEGER LastAccessTime;
+    /**
+    * Specifies the time that the file was last written to.
+    */
     LARGE_INTEGER LastWriteTime;
+    /**
+    * Specifies the last time the file was changed.
+    */
     LARGE_INTEGER ChangeTime;
+    /**
+    * Specifies one or more FILE_ATTRIBUTE_XXX flags. 
+    */
     ULONG FileAttributes;
 } FILE_BASIC_INFORMATION, *PFILE_BASIC_INFORMATION;
 
+/**
+ * The FILE_STANDARD_INFORMATION structure is used as an argument to routines that query or set file information.
+ * 
+ * @remarks EndOfFile specifies the byte offset to the end of the file. 
+ * Because this value is zero-based, it actually refers to the first free byte in the file;
+ * that is, it is the offset to the byte immediately following the last valid byte in the file.
+ */
 typedef struct _FILE_STANDARD_INFORMATION
 {
+    /**
+    * The file allocation size in bytes. Usually, this value is a multiple of the sector or cluster size of the underlying physical device.
+    */
     LARGE_INTEGER AllocationSize;
+    /**
+    * The end of file location as a byte offset.
+    */
     LARGE_INTEGER EndOfFile;
+    /**
+    * The number of hard links to the file.
+    */
     ULONG NumberOfLinks;
+    /**
+    * The delete pending status. TRUE indicates that a file deletion has been requested.
+    */
     BOOLEAN DeletePending;
+    /**
+    * The file directory status. TRUE indicates the file object represents a directory.
+    */
     BOOLEAN Directory;
 } FILE_STANDARD_INFORMATION, *PFILE_STANDARD_INFORMATION;
 
-//#if (PHNT_VERSION >= PHNT_THRESHOLD)
+/**
+ * The FILE_STANDARD_INFORMATION_EX structure is used as an argument to routines that query or set file information.
+ * 
+ * @remarks EndOfFile specifies the byte offset to the end of the file. 
+ * Because this value is zero-based, it actually refers to the first free byte in the file;
+ * that is, it is the offset to the byte immediately following the last valid byte in the file.
+ */
 typedef struct _FILE_STANDARD_INFORMATION_EX
 {
+    /**
+    * The file allocation size in bytes. Usually, this value is a multiple of the sector or cluster size of the underlying physical device.
+    */
     LARGE_INTEGER AllocationSize;
+    /**
+    * The end of file location as a byte offset.
+    */
     LARGE_INTEGER EndOfFile;
+    /**
+    * The number of hard links to the file.
+    */
     ULONG NumberOfLinks;
+    /**
+    * The delete pending status. TRUE indicates that a file deletion has been requested.
+    */
     BOOLEAN DeletePending;
+    /**
+    * The file directory status. TRUE indicates the file object represents a directory.
+    */
     BOOLEAN Directory;
+    /**
+    * The alternate data stream status. TRUE indicates the file object represents an alternate data stream.
+    */
     BOOLEAN AlternateStream;
+    /**
+    * The metadata attribute status. TRUE indicates the file object represents a metadata attribute.
+    */
     BOOLEAN MetadataAttribute;
 } FILE_STANDARD_INFORMATION_EX, *PFILE_STANDARD_INFORMATION_EX;
-//#endif
 
 typedef struct _FILE_INTERNAL_INFORMATION
 {
@@ -568,58 +645,156 @@ typedef struct _FILE_PIPE_LOCAL_INFORMATION
      ULONG NamedPipeEnd;
 } FILE_PIPE_LOCAL_INFORMATION, *PFILE_PIPE_LOCAL_INFORMATION;
 
+/**
+ * The FILE_PIPE_REMOTE_INFORMATION structure contains information about the remote end of a named pipe.
+ */
 typedef struct _FILE_PIPE_REMOTE_INFORMATION
 {
+    /**
+     * The maximum amount of time, in 100-nanosecond intervals, that elapses before transmission of data from the client machine to the server.
+     */
      LARGE_INTEGER CollectDataTime;
+     /**
+     * The maximum size, in bytes, of data that will be collected on the client machine before transmission to the server.
+     */
      ULONG MaximumCollectionCount;
 } FILE_PIPE_REMOTE_INFORMATION, *PFILE_PIPE_REMOTE_INFORMATION;
 
+/**
+ * The FILE_MAILSLOT_QUERY_INFORMATION structure contains information about a mailslot.
+ */
 typedef struct _FILE_MAILSLOT_QUERY_INFORMATION
 {
+    /**
+    * The maximum size, in bytes, of a single message that can be written to the mailslot, or 0 for a message of any size.
+    */
     ULONG MaximumMessageSize;
+    /**
+    * The size, in bytes, of the in-memory pool that is reserved for writes to this mailslot.
+    */
     ULONG MailslotQuota;
+    /**
+    * The next message size, in bytes.
+    */
     ULONG NextMessageSize;
+    /**
+    * The total number of messages waiting to be read from the mailslot.
+    */
     ULONG MessagesAvailable;
+    /**
+    * The time, in milliseconds, that a read operation can wait for a message to be written to the mailslot before a time-out occurs.
+    * A value of –1 requests that the read wait forever for a message, without timing out.
+    * A value of 0 requests that the read not wait and return immediately whether a pending message is available to be read or not.
+    */
     LARGE_INTEGER ReadTimeout;
 } FILE_MAILSLOT_QUERY_INFORMATION, *PFILE_MAILSLOT_QUERY_INFORMATION;
 
+/*
+ * The FILE_MAILSLOT_SET_INFORMATION structure contains information for setting the read timeout of a mailslot.
+ */
 typedef struct _FILE_MAILSLOT_SET_INFORMATION
 {
+    /**
+    * Pointer to a LARGE_INTEGER structure that specifies the read timeout.
+    */
     PLARGE_INTEGER ReadTimeout;
 } FILE_MAILSLOT_SET_INFORMATION, *PFILE_MAILSLOT_SET_INFORMATION;
 
+/*
+ * The FILE_REPARSE_POINT_INFORMATION structure contains information about a reparse point.
+ */
 typedef struct _FILE_REPARSE_POINT_INFORMATION
 {
+    /**
+    * The file reference number of the reparse point.
+    */
     LONGLONG FileReference;
+    /**
+    * The reparse tag of the reparse point.
+    */
     ULONG Tag;
 } FILE_REPARSE_POINT_INFORMATION, *PFILE_REPARSE_POINT_INFORMATION;
 
+/*
+ * The FILE_LINK_ENTRY_INFORMATION structure contains information about a link entry in a directory.
+ */
 typedef struct _FILE_LINK_ENTRY_INFORMATION
 {
+    /**
+    * The offset, in bytes, to the next link entry in the directory.
+    */
     ULONG NextEntryOffset;
+    /**
+    * The file ID of the parent directory.
+    */
     LONGLONG ParentFileId; // LARGE_INTEGER
+    /**
+    * The length, in bytes, of the file name.
+    */
     ULONG FileNameLength;
+    /**
+    * The file name.
+    */
     _Field_size_bytes_(FileNameLength) WCHAR FileName[1];
 } FILE_LINK_ENTRY_INFORMATION, *PFILE_LINK_ENTRY_INFORMATION;
 
+/*
+ * The FILE_LINKS_INFORMATION structure is used to query or set NTFS hard links to an existing file.
+ */
 typedef struct _FILE_LINKS_INFORMATION
 {
+    /**
+    * The number of bytes needed to hold all available names returned in Entry. This value must be greater than 0.
+    */
     ULONG BytesNeeded;
+    /**
+    * The number of FILE_LINK_ENTRY_INFORMATION structures that have been returned using the Entry member.
+    */
     ULONG EntriesReturned;
+    /**
+    * A buffer that contains the returned FILE_LINK_ENTRY_INFORMATION structures.
+    */
     FILE_LINK_ENTRY_INFORMATION Entry;
 } FILE_LINKS_INFORMATION, *PFILE_LINKS_INFORMATION;
 
+/**
+ * Contains the full UNC physical pathname for a file or directory on a remote file share.
+ */
 typedef struct _FILE_NETWORK_PHYSICAL_NAME_INFORMATION
 {
+    /**
+    * The length, in bytes, of the physical name in FileName.
+    */
     ULONG FileNameLength;
+    /**
+    * The full UNC path of the network file share of the target.
+    */
     _Field_size_bytes_(FileNameLength) WCHAR FileName[1];
 } FILE_NETWORK_PHYSICAL_NAME_INFORMATION, *PFILE_NETWORK_PHYSICAL_NAME_INFORMATION;
 
+/**
+ * Structure representing standard link information for a file.
+ */
 typedef struct _FILE_STANDARD_LINK_INFORMATION
 {
+    /**
+    * The number of accessible links to the file.
+    */
     ULONG NumberOfAccessibleLinks;
+    
+    /**
+    * The total number of links to the file.
+    */
     ULONG TotalNumberOfLinks;
+    
+    /**
+    * Indicates whether the file is pending deletion.
+    */
     BOOLEAN DeletePending;
+    
+    /**
+    * Indicates whether the file is a directory.
+    */
     BOOLEAN Directory;
 } FILE_STANDARD_LINK_INFORMATION, *PFILE_STANDARD_LINK_INFORMATION;
 

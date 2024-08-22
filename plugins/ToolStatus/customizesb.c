@@ -305,7 +305,6 @@ INT_PTR CALLBACK CustomizeStatusBarDialogProc(
                 context->TextColor = GetSysColor(COLOR_WINDOWTEXT);
             }
 
-
             ListBox_SetItemHeight(context->AvailableListHandle, 0, PhGetDpi(22, context->WindowDpi)); // BitmapHeight
             ListBox_SetItemHeight(context->CurrentListHandle, 0, PhGetDpi(22, context->WindowDpi)); // BitmapHeight
 
@@ -314,6 +313,9 @@ INT_PTR CALLBACK CustomizeStatusBarDialogProc(
             PhInitializeWindowTheme(hwndDlg, !!PhGetIntegerSetting(L"EnableThemeSupport"));
 
             PhSetDialogFocus(context->WindowHandle, context->CurrentListHandle);
+
+            ShowWindow(hwndDlg, SW_SHOW);
+            SetForegroundWindow(hwndDlg);
         }
         break;
     case WM_DESTROY:
