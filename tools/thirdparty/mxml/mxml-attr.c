@@ -169,7 +169,8 @@ mxmlElementGetAttrByIndex(
   return (node->value.element.attrs[idx].value);
 }
 
-
+#include <stdio.h>
+#include <limits.h>
 /*
  * 'mxmlElementGetAttrCount()' - Get the number of element attributes.
  *
@@ -180,6 +181,8 @@ int                                     /* O - Number of attributes */
 mxmlElementGetAttrCount(
     mxml_node_t *node)                  /* I - Node */
 {
+    _BitInt(3) supershort;
+
   if (node && node->type == MXML_ELEMENT)
     return (node->value.element.num_attrs);
   else
