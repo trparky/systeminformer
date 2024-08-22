@@ -2107,13 +2107,17 @@ VOID PhMwpOnCommand(
 
             if (networkItem && networkItem->OwnerName)
             {
-                if (serviceItem = PhReferenceServiceItem(networkItem->OwnerName->Buffer))
+                if (serviceItem = PhReferenceServiceItem(&networkItem->OwnerName->sr))
                 {
                     PhMwpSelectPage(PhMwpServicesPage->Index);
                     SetFocus(PhMwpServiceTreeNewHandle);
                     ProcessHacker_SelectServiceItem(serviceItem);
 
                     PhDereferenceObject(serviceItem);
+                }
+                else
+                {
+                    PhShowStatus(WindowHandle, L"The service does not exist.", STATUS_INVALID_CID, 0);
                 }
             }
         }

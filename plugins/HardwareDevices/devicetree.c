@@ -309,7 +309,7 @@ PDEVICE_TREE DeviceTreeCreateIfNecessary(
 
 VOID NTAPI DeviceTreePublish(
     _In_opt_ PDEVICE_TREE Tree
-)
+    )
 {
     PDEVICE_TREE oldTree;
 
@@ -925,7 +925,7 @@ BOOLEAN NTAPI DeviceTreeCallback(
 
                             if (!PhIsNullOrEmptyString(serviceName))
                             {
-                                if (serviceItem = PhReferenceServiceItem(PhGetString(serviceName)))
+                                if (serviceItem = PhReferenceServiceItem(&serviceName->sr))
                                 {
                                     ProcessHacker_SelectTabPage(1);
                                     ProcessHacker_SelectServiceItem(serviceItem);
