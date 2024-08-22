@@ -26,7 +26,8 @@
 #define IDD_FINDOBJECTS                 130
 #define IDD_OBJTOKEN                    131
 #define ID_PLUGIN_MENU_ITEM             131
-#define IDD_HIDDENPROCESSES             135
+#define ID_CALLBACK_MENU_ITEM           132
+#define IDD_ZOMBIEPROCESSES             135
 #define ID_TRAYICONS_REGISTERED         135
 #define IDD_RUNAS                       136
 #define ID_COPY_CELL                    136

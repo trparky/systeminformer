@@ -115,10 +115,6 @@ VOID PhAddDefaultSettings(
     PhpAddStringSetting(L"HandleStatisticsListViewColumns", L"");
     PhpAddStringSetting(L"HandleStatisticsListViewSort", L"0,1");
     PhpAddScalableIntegerPairSetting(L"HandleStatisticsWindowSize", L"@96|0,0");
-    PhpAddIntegerSetting(L"HiddenProcessesMenuEnabled", L"0");
-    PhpAddStringSetting(L"HiddenProcessesListViewColumns", L"");
-    PhpAddIntegerPairSetting(L"HiddenProcessesWindowPosition", L"400,400");
-    PhpAddScalableIntegerPairSetting(L"HiddenProcessesWindowSize", L"@96|520,400");
     PhpAddIntegerSetting(L"HideDefaultServices", L"0");
     PhpAddIntegerSetting(L"HideDriverServices", L"0");
     PhpAddIntegerSetting(L"HideFreeRegions", L"1");
@@ -276,6 +272,10 @@ VOID PhAddDefaultSettings(
     PhpAddStringSetting(L"WmiProviderTreeListSort", L"0,0"); // 0, NoSortOrder
     PhpAddIntegerSetting(L"WmiProviderTreeListFlags", L"0");
     PhpAddStringSetting(L"VdmHostListViewColumns", L"");
+    PhpAddIntegerSetting(L"ZombieProcessesMenuEnabled", L"0");
+    PhpAddStringSetting(L"ZombieProcessesListViewColumns", L"");
+    PhpAddIntegerPairSetting(L"ZombieProcessesWindowPosition", L"400,400");
+    PhpAddScalableIntegerPairSetting(L"ZombieProcessesWindowSize", L"@96|520,400");
 
     // Colors are specified with R in the lowest byte, then G, then B. So: bbggrr.
     PhpAddIntegerSetting(L"ColorNew", L"00ff7f"); // Chartreuse
