@@ -108,10 +108,6 @@ PH_DEFINE_IMPORT(L"advapi32.dll", ConvertStringSecurityDescriptorToSecurityDescr
 
 PH_DEFINE_IMPORT(L"shlwapi.dll", SHAutoComplete);
 
-PH_DEFINE_IMPORT(L"kernel32.dll", PssCaptureSnapshot);
-PH_DEFINE_IMPORT(L"kernel32.dll", PssQuerySnapshot);
-PH_DEFINE_IMPORT(L"kernel32.dll", PssFreeSnapshot);
-
 PH_DEFINE_IMPORT(L"userenv.dll", CreateEnvironmentBlock);
 PH_DEFINE_IMPORT(L"userenv.dll", DestroyEnvironmentBlock);
 PH_DEFINE_IMPORT(L"userenv.dll", GetAppContainerRegistryLocation);
