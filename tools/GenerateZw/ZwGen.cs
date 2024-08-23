@@ -24,33 +24,6 @@ namespace GenerateZw
         private static readonly string OutputFile = "ntzwapi.h";
         private static readonly string Header = "#ifndef _NTZWAPI_H\r\n#define _NTZWAPI_H\r\n\r\n// This file was automatically generated. Do not edit.\r\n\r\n";
         private static readonly string Footer = "#endif\r\n";
-        public static readonly string[] Files =
-        {
-            "ntdbg.h",
-            "ntexapi.h",
-            "ntgdi.h",
-            "ntioapi.h",
-            "ntkeapi.h",
-            "ntldr.h",
-            "ntlpcapi.h",
-            "ntmisc.h",
-            "ntmmapi.h",
-            "ntnls.h",
-            "ntobapi.h",
-            "ntpebteb.h",
-            "ntpfapi.h",
-            "ntpnpapi.h",
-            "ntpoapi.h",
-            "ntpsapi.h",
-            "ntregapi.h",
-            "ntrtl.h",
-            "ntsam.h",
-            "ntseapi.h",
-            "nttmapi.h",
-            "nttp.h",
-            "ntwow64.h",
-            "ntxcapi.h"
-        };
 
         static ZwGen()
         {
@@ -72,13 +45,13 @@ namespace GenerateZw
         {
             // Build up a list of definitions.
 
+            var files = Directory.GetFiles(BaseDirectory, "*.h", SearchOption.AllDirectories);
             var definitions = new List<ServiceDefinition>();
             var regex = RegexDefinition.Regex();
 
-            foreach (string fileName in Files)
+            foreach (string fileName in files)
             {
-                var file = BaseDirectory + Path.DirectorySeparatorChar + fileName;
-                var text = File.ReadAllText(file);
+                var text = File.ReadAllText(fileName);
 
                 MatchCollection matches = regex.Matches(text);
 

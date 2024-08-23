@@ -4,11 +4,16 @@
         <OutputType>Exe</OutputType>
         <Platforms>AnyCPU</Platforms>
         <PlatformTarget>AnyCPU</PlatformTarget>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <RuntimeIdentifier>win-x64</RuntimeIdentifier>
         <IntDir>$(ProjectDir)obj\$(Configuration)\$(TargetFramework)-$(PlatformTarget)\</IntDir>
         <OutDir>$(ProjectDir)bin\$(Configuration)\$(TargetFramework)-$(PlatformTarget)\</OutDir>
         <PublishAot>true</PublishAot>
+        <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
+        <FileAlignment>4096</FileAlignment>
+        <ChecksumAlgorithm>SHA256</ChecksumAlgorithm>
+        <CodePage>65001</CodePage>
+        <Utf8Output>true</Utf8Output>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -19,7 +24,7 @@
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
       <DefineConstants />
-      <DebugType>embedded</DebugType>
+      <DebugType>full</DebugType>
       <DebugSymbols>true</DebugSymbols>
     </PropertyGroup>
     

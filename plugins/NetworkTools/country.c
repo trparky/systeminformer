@@ -10,7 +10,7 @@
  */
 
 #include "nettools.h"
-#include "../../tools/thirdparty/maxminddb/maxminddb.h"
+#include <maxminddb.h>
 
 BOOLEAN GeoDbInitialized = FALSE;
 BOOLEAN GeoDbExpired = FALSE;
@@ -173,6 +173,7 @@ CONST GEODB_GEONAME_CACHE_TABLE GeoCountryResourceTable[] =
 
 GEODB_IMAGE_CACHE_TABLE GeoCountryImageTable[RTL_NUMBER_OF(GeoCountryResourceTable)];
 
+
 BOOLEAN NetToolsGeoLiteInitialized(
     VOID
     )
@@ -195,7 +196,9 @@ BOOLEAN NetToolsGeoLiteInitialized(
 
         if (!PhIsNullOrEmptyString(dbpath))
         {
-            if (MMDB_open(&dbpath->sr, MMDB_MODE_MMAP, &GeoDbInstance) == MMDB_SUCCESS)
+            PPH_BYTES fileName = PhConvertStringToUtf8(dbpath);
+
+            if (MMDB_open(fileName->Buffer, MMDB_MODE_MMAP, &GeoDbInstance) == MMDB_SUCCESS)
             {
                 LARGE_INTEGER systemTime;
                 ULONG secondsSince1970;
@@ -224,6 +227,7 @@ BOOLEAN NetToolsGeoLiteInitialized(
                 GeoDbInitialized = TRUE;
             }
 
+            PhDereferenceObject(fileName);
             PhDereferenceObject(dbpath);
         }
 
