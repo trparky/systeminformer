@@ -61,23 +61,26 @@ static PH_QUEUED_LOCK WindowCallbackListLock = PH_QUEUED_LOCK_INIT;
 static PPH_HASHTABLE WindowContextHashTable = NULL;
 static PH_QUEUED_LOCK WindowContextListLock = PH_QUEUED_LOCK_INIT;
 
-static _OpenThemeDataForDpi OpenThemeDataForDpi_I = NULL;
-static _OpenThemeData OpenThemeData_I = NULL;
-static _CloseThemeData CloseThemeData_I = NULL;
-static _SetWindowTheme SetWindowTheme_I = NULL;
-static _IsThemeActive IsThemeActive_I = NULL;
-static _IsThemePartDefined IsThemePartDefined_I = NULL;
+static typeof(&OpenThemeDataForDpi) OpenThemeDataForDpi_I = NULL;
+static typeof(&OpenThemeData) OpenThemeData_I = NULL;
+static typeof(&CloseThemeData) CloseThemeData_I = NULL;
+static typeof(&SetWindowTheme) SetWindowTheme_I = NULL;
+static typeof(&IsThemeActive) IsThemeActive_I = NULL;
+static typeof(&IsThemePartDefined) IsThemePartDefined_I = NULL;
 static _GetThemeClass GetThemeClass_I = NULL;
-static _GetThemeInt GetThemeInt_I = NULL;
-static _GetThemePartSize GetThemePartSize_I = NULL;
-static _DrawThemeBackground DrawThemeBackground_I = NULL;
-static _DrawThemeTextEx DrawThemeTextEx_I = NULL;
-static _GetDpiForMonitor GetDpiForMonitor_I = NULL; // win81+
-static _GetDpiForWindow GetDpiForWindow_I = NULL; // win10rs1+
-static _GetDpiForSystem GetDpiForSystem_I = NULL; // win10rs1+
+static typeof(&GetThemeColor) GetThemeColor_I = NULL;
+static typeof(&GetThemeInt) GetThemeInt_I = NULL;
+static typeof(&GetThemePartSize) GetThemePartSize_I = NULL;
+static typeof(&DrawThemeBackground) DrawThemeBackground_I = NULL;
+static typeof(&DrawThemeTextEx) DrawThemeTextEx_I = NULL;
+static typeof(&GetDpiForMonitor) GetDpiForMonitor_I = NULL; // win81+
+static typeof(&GetDpiForWindow) GetDpiForWindow_I = NULL; // win10rs1+
+static typeof(&GetDpiForSystem) GetDpiForSystem_I = NULL; // win10rs1+
+static typeof(&PostMessageW) PostMessage_I = NULL; // win10rs1+
+static typeof(&SendMessageW) SendMessage_I = NULL; // win10rs1+
 //static _GetDpiForSession GetDpiForSession_I = NULL; // ordinal 2713
-static _GetSystemMetricsForDpi GetSystemMetricsForDpi_I = NULL;
-static _SystemParametersInfoForDpi SystemParametersInfoForDpi_I = NULL;
+static typeof(&GetSystemMetricsForDpi) GetSystemMetricsForDpi_I = NULL;
+static typeof(&SystemParametersInfoForDpi) SystemParametersInfoForDpi_I = NULL;
 static _CreateMRUList CreateMRUList_I = NULL;
 static _AddMRUString AddMRUString_I = NULL;
 static _EnumMRUList EnumMRUList_I = NULL;
@@ -271,6 +274,21 @@ BOOLEAN PhGetThemeClass(
         return FALSE;
 
     return SUCCEEDED(GetThemeClass_I(ThemeHandle, Class, ClassLength));
+}
+
+_Success_(return)
+BOOLEAN PhGetThemeColor(
+    _In_ HTHEME ThemeHandle,
+    _In_ INT PartId,
+    _In_ INT StateId,
+    _In_ INT PropId,
+    _Out_ COLORREF* Color
+    )
+{
+    if (!GetThemeColor_I)
+        return FALSE;
+
+    return SUCCEEDED(GetThemeColor_I(ThemeHandle, PartId, StateId, PropId, Color));
 }
 
 _Success_(return)
@@ -1257,6 +1275,22 @@ VOID PhSetImageListBitmap(
     }
 }
 
+PVOID PhGetListViewInterface(
+    _In_ HWND ListViewHandle
+    )
+{
+    IListView* ListViewPtr = NULL;
+
+    DefWindowProc(
+        ListViewHandle,
+        LVM_QUERYINTERFACE,
+        (WPARAM)&IID_IListView,
+        (LPARAM)&ListViewPtr
+        );
+
+    return ListViewPtr;
+}
+
 static BOOLEAN SharedIconCacheHashtableEqualFunction(
     _In_ PVOID Entry1,
     _In_ PVOID Entry2
@@ -1701,24 +1735,21 @@ HWND PhCreateDialog(
 }
 
 HWND PhCreateWindow(
-    _In_ ULONG ExStyle,
     _In_opt_ PCWSTR ClassName,
-    _In_opt_ PCWSTR WindowName,
     _In_ ULONG Style,
-    _In_ INT X,
-    _In_ INT Y,
-    _In_ INT Width,
-    _In_ INT Height,
+    _In_ LONG X,
+    _In_ LONG Y,
+    _In_ LONG Width,
+    _In_ LONG Height,
     _In_opt_ HWND ParentWindow,
     _In_opt_ HMENU MenuHandle,
     _In_opt_ PVOID InstanceHandle,
     _In_opt_ PVOID Parameter
     )
 {
-    return CreateWindowEx(
-        ExStyle,
+    return CreateWindow(
         ClassName,
-        WindowName,
+        NULL,
         Style,
         X,
         Y,
@@ -1729,6 +1760,61 @@ HWND PhCreateWindow(
         InstanceHandle,
         Parameter
         );
+}
+
+HWND PhCreateWindowEx(
+    _In_opt_ PCWSTR ClassName,
+    _In_ ULONG Style,
+    _In_ ULONG ExStyle,
+    _In_ LONG X,
+    _In_ LONG Y,
+    _In_ LONG Width,
+    _In_ LONG Height,
+    _In_opt_ HWND ParentWindow,
+    _In_opt_ HMENU MenuHandle,
+    _In_opt_ PVOID InstanceHandle,
+    _In_opt_ PVOID Parameter
+    )
+{
+    HWND windowHandle;
+
+    windowHandle = CreateWindowEx(
+        ExStyle,
+        ClassName,
+        NULL,
+        Style,
+        X,
+        Y,
+        Width,
+        Height,
+        ParentWindow,
+        MenuHandle,
+        InstanceHandle,
+        Parameter
+        );
+
+    return windowHandle;
+}
+
+HWND PhCreateMessageWindow(
+    VOID
+    )
+{
+    HWND windowHandle;
+
+    windowHandle = CreateWindowEx(
+        0,
+        L"Message",
+        NULL,
+        0,
+        0, 0, 0, 0,
+        HWND_MESSAGE,
+        NULL,
+        NULL,
+        NULL
+        );
+
+    return windowHandle;
 }
 
 INT_PTR PhDialogBox(
