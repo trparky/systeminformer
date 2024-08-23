@@ -13,9 +13,7 @@
 #include <phbasesup.h>
 #include <phutil.h>
 #include <json.h>
-
-#include "../tools/thirdparty/jsonc/json.h"
-#include "../tools/thirdparty/mxml/mxml.h"
+#include <thirdparty.h>
 
 static PVOID json_get_object(
     _In_ PVOID Object,

@@ -55,3 +55,14 @@
 #error "ThirdParty.lib is mssing"
 #endif
 
+#if __has_include("../../tools/thirdparty/winsdk/dia2.h")
+#include "../../tools/thirdparty/winsdk/dia2.h"
+#else
+#error "ThirdParty.lib is mssing"
+#endif
+
+#if __has_include("../../tools/thirdparty/winsdk/dia3.h")
+#include "../../tools/thirdparty/winsdk/dia3.h"
+#else
+#error "ThirdParty.lib is mssing"
+#endif

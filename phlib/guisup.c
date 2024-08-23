@@ -18,10 +18,10 @@
 #include <settings.h>
 #include <guisupp.h>
 
-#include <math.h>
 #include <commoncontrols.h>
 #include <shellscalingapi.h>
 #include <wincodec.h>
+#include <uxtheme.h>
 
 BOOLEAN NTAPI PhpWindowContextHashtableEqualFunction(
     _In_ PVOID Entry1,
