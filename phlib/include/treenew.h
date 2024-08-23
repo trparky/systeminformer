@@ -334,6 +334,12 @@ typedef struct _PH_TREENEW_KEY_EVENT
     ULONG Data;
 } PH_TREENEW_KEY_EVENT, *PPH_TREENEW_KEY_EVENT;
 
+typedef struct _PH_TREENEW_SORT_CHANGED_EVENT
+{
+    ULONG SortColumn;
+    PH_SORT_ORDER SortOrder;
+} PH_TREENEW_SORT_CHANGED_EVENT, *PPH_TREENEW_SORT_CHANGED_EVENT;
+
 typedef struct _PH_TREENEW_NODE_EVENT
 {
     BOOLEAN Handled;
@@ -435,7 +441,9 @@ typedef struct _PH_TREENEW_SET_HEADER_CACHE
 #define TNM_ENSUREVISIBLEINDEX (WM_USER + 49)
 #define TNM_GETVISIBLECOLUMN (WM_USER + 50)
 #define TNM_GETVISIBLECOLUMNARRAY (WM_USER + 51)
-#define TNM_LAST (WM_USER + 52)
+#define TNM_GETSELECTEDCOUNT (WM_USER + 52)
+#define TNM_FOCUSMARKSELECT (WM_USER + 53)
+#define TNM_LAST (WM_USER + 54)
 
 #define TreeNew_SetCallback(hWnd, Callback, Context) \
     SendMessage((hWnd), TNM_SETCALLBACK, (WPARAM)(Context), (LPARAM)(Callback))

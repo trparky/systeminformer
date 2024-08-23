@@ -13,9 +13,7 @@
 #ifndef _PH_PHBASESUP_H
 #define _PH_PHBASESUP_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+EXTERN_C_START
 
 PHLIBAPI
 BOOLEAN
@@ -820,10 +818,10 @@ PhCompareBytesZ(
     _In_ BOOLEAN IgnoreCase
     )
 {
-    if (!IgnoreCase)
-        return strcmp(String1, String2);
-    else
+    if (IgnoreCase)
         return _stricmp(String1, String2);
+    else
+        return strcmp(String1, String2);
 }
 
 FORCEINLINE
@@ -834,10 +832,10 @@ PhEqualBytesZ(
     _In_ BOOLEAN IgnoreCase
     )
 {
-    if (!IgnoreCase)
-        return strcmp(String1, String2) == 0;
-    else
+    if (IgnoreCase)
         return _stricmp(String1, String2) == 0;
+    else
+        return strcmp(String1, String2) == 0;
 }
 
 FORCEINLINE
@@ -848,10 +846,10 @@ PhCompareStringZ(
     _In_ BOOLEAN IgnoreCase
     )
 {
-    if (!IgnoreCase)
-        return wcscmp(String1, String2);
-    else
+    if (IgnoreCase)
         return _wcsicmp(String1, String2);
+    else
+        return wcscmp(String1, String2);
 }
 
 FORCEINLINE
@@ -862,17 +860,17 @@ PhEqualStringZ(
     _In_ BOOLEAN IgnoreCase
     )
 {
-    if (!IgnoreCase)
-    {
-        return wcscmp(String1, String2) == 0;
-    }
-    else
+    if (IgnoreCase)
     {
         // wcsicmp is very expensive, so we do a quick check for negatives first.
         if (PhAreCharactersDifferent(String1[0], String2[0]))
             return FALSE;
 
         return _wcsicmp(String1, String2) == 0;
+    }
+    else
+    {
+        return wcscmp(String1, String2) == 0;
     }
 }
 
@@ -1626,6 +1624,9 @@ PhGetStringOrDefault(
  *
  * \param String A pointer to a string object.
  */
+//_Check_return_ 
+//_Success_(((String != NULL && String->Length != 0) && return == 1))
+//_When_(String != NULL && String->Length != 0 && return == 1, _At_(String, _Post_valid_ _Post_notnull_))
 //FORCEINLINE
 //BOOLEAN
 //PhIsNullOrEmptyString(
@@ -1634,6 +1635,15 @@ PhGetStringOrDefault(
 //{
 //    return !String || String->Length == 0;
 //}
+
+FORCEINLINE
+BOOLEAN
+PhIsNullOrEmptyStringRef(
+    _Pre_maybenull_ _Post_valid_ PPH_STRINGREF String
+    )
+{
+    return !(String && String->Length);
+}
 
 // VS2019 can't parse the inline bool check for the above PhIsNullOrEmptyString
 // inline function creating invalid C6387 warnings using the input string (dmex)
@@ -1669,10 +1679,10 @@ PhCompareString(
     _In_ BOOLEAN IgnoreCase
     )
 {
-    if (!IgnoreCase)
-        return wcscmp(String1->Buffer, String2->Buffer);
-    else
+    if (IgnoreCase)
         return PhCompareStringRef(&String1->sr, &String2->sr, IgnoreCase); // faster than wcsicmp
+    else
+        return wcscmp(String1->Buffer, String2->Buffer);
 }
 
 /**
@@ -1690,14 +1700,10 @@ PhCompareString2(
     _In_ BOOLEAN IgnoreCase
     )
 {
-    if (!IgnoreCase)
-    {
-        return wcscmp(String1->Buffer, String2);
-    }
-    else
-    {
+    if (IgnoreCase)
         return PhCompareStringRef2(&String1->sr, String2, IgnoreCase);
-    }
+    else
+        return wcscmp(String1->Buffer, String2);
 }
 
 /**
@@ -1809,14 +1815,10 @@ PhEqualString2(
     _In_ BOOLEAN IgnoreCase
     )
 {
-    if (!IgnoreCase)
-    {
-        return wcscmp(String1->Buffer, String2) == 0;
-    }
-    else
-    {
+    if (IgnoreCase)
         return PhEqualStringRef2(&String1->sr, String2, IgnoreCase);
-    }
+    else
+        return wcscmp(String1->Buffer, String2) == 0;
 }
 
 /**
@@ -2383,6 +2385,36 @@ PhConvertUtf16ToUtf8Ex(
     _In_ PWCHAR Buffer,
     _In_ SIZE_T Length
     );
+
+FORCEINLINE
+PPH_BYTES
+NTAPI
+PhConvertStringToUtf8(
+    _In_ PPH_STRING String
+    )
+{
+    return PhConvertUtf16ToUtf8Ex(String->Buffer, String->Length);
+}
+
+FORCEINLINE
+PPH_BYTES
+NTAPI
+PhConvertStringRefToUtf8(
+    _In_ PPH_STRINGREF String
+    )
+{
+    return PhConvertUtf16ToUtf8Ex(String->Buffer, String->Length);
+}
+
+FORCEINLINE
+PPH_STRING
+NTAPI
+PhConvertBytesToUtf16(
+    _In_ PPH_BYTES String
+    )
+{
+    return PhConvertUtf8ToUtf16Ex(String->Buffer, String->Length);
+}
 
 // String builder
 
@@ -3073,7 +3105,7 @@ VOID
 PhDistributeHashSet(
     _Inout_ PPH_HASH_ENTRY *NewBuckets,
     _In_ ULONG NumberOfNewBuckets,
-    _In_ PPH_HASH_ENTRY *OldBuckets,
+    _In_ CONST PPH_HASH_ENTRY *OldBuckets,
     _In_ ULONG NumberOfOldBuckets
     )
 {
@@ -3141,7 +3173,7 @@ PhAddEntryHashSet(
 FORCEINLINE
 PPH_HASH_ENTRY
 PhFindEntryHashSet(
-    _In_ PPH_HASH_ENTRY *Buckets,
+    _In_ CONST PPH_HASH_ENTRY *Buckets,
     _In_ ULONG NumberOfBuckets,
     _In_ ULONG Hash
     )
@@ -3496,6 +3528,8 @@ typedef struct _PH_KEY_VALUE_PAIR
     PVOID Value;
 } PH_KEY_VALUE_PAIR, *PPH_KEY_VALUE_PAIR;
 
+typedef CONST PH_KEY_VALUE_PAIR *PPCH_KEY_VALUE_PAIR;
+
 PHLIBAPI
 PPH_HASHTABLE
 NTAPI
@@ -3649,7 +3683,7 @@ typedef struct _PH_CALLBACK
     PH_CONDITION BusyCondition;
 } PH_CALLBACK, *PPH_CALLBACK;
 
-#define PH_CALLBACK_DECLARE(Name) PH_CALLBACK Name = { &Name.ListHead, &Name.ListHead, PH_QUEUED_LOCK_INIT, PH_CONDITION_INIT }
+#define PH_CALLBACK_DECLARE(Name) PH_CALLBACK Name = { &(Name).ListHead, &(Name).ListHead, PH_QUEUED_LOCK_INIT, PH_CONDITION_INIT }
 
 PHLIBAPI
 VOID
@@ -4721,8 +4755,6 @@ PhEnumAvlTree(
     _In_opt_ PVOID Context
     );
 
-#ifdef __cplusplus
-}
-#endif
+EXTERN_C_END
 
 #endif

@@ -13,6 +13,8 @@
 #ifndef _PH_APIIMPORT_H
 #define _PH_APIIMPORT_H
 
+EXTERN_C_START
+
 // ntdll
 
 typedef NTSTATUS (NTAPI *_NtQueryInformationEnlistment)(
@@ -263,9 +265,7 @@ PH_DECLARE_IMPORT(ConvertStringSecurityDescriptorToSecurityDescriptorW);
 
 PH_DECLARE_IMPORT(SHAutoComplete);
 
-PH_DECLARE_IMPORT(PssCaptureSnapshot);
-PH_DECLARE_IMPORT(PssQuerySnapshot);
-PH_DECLARE_IMPORT(PssFreeSnapshot);
+// Userenv
 
 PH_DECLARE_IMPORT(CreateEnvironmentBlock);
 PH_DECLARE_IMPORT(DestroyEnvironmentBlock);

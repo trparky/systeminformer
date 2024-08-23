@@ -47,6 +47,8 @@ typedef LPNMRUNFILEDLGW LPNMRUNFILEDLG;
 
 typedef HANDLE HTHEME;
 
+// GetDCEx doesn't work without these undocumented flags. 
+
 #define DCX_USESTYLE 0x00010000
 #define DCX_NODELETERGN 0x00040000
 
@@ -132,6 +134,18 @@ PhGetThemeClass(
     _In_ HTHEME ThemeHandle,
     _Out_writes_z_(ClassLength) PWSTR Class,
     _In_ ULONG ClassLength
+    );
+
+_Success_(return)
+PHLIBAPI
+BOOLEAN
+NTAPI
+PhGetThemeColor(
+    _In_ HTHEME ThemeHandle,
+    _In_ INT PartId,
+    _In_ INT StateId,
+    _In_ INT PropId,
+    _Out_ COLORREF* Color
     );
 
 _Success_(return)
@@ -2269,7 +2283,7 @@ FORCEINLINE
 BOOLEAN
 NTAPI
 PhRectEmpty(
-    _In_ PRECT Rect
+    _In_ CONST PRECT Rect
     )
 {
 #if (PHNT_NATIVE_RECT)
@@ -2289,7 +2303,7 @@ FORCEINLINE
 VOID
 NTAPI
 PhInflateRect(
-    _In_ PRECT Rect,
+    _In_ CONST PRECT Rect,
     _In_ INT dx,
     _In_ INT dy
     )
@@ -2308,7 +2322,7 @@ FORCEINLINE
 VOID
 NTAPI
 PhOffsetRect(
-    _In_ PRECT Rect,
+    _In_ CONST PRECT Rect,
     _In_ INT dx,
     _In_ INT dy
     )
@@ -2327,8 +2341,8 @@ FORCEINLINE
 BOOLEAN
 NTAPI
 PhPtInRect(
-    _In_ PRECT Rect,
-    _In_ POINT Point
+    _In_ CONST PRECT Rect,
+    _In_ CONST POINT Point
     )
 {
 #if (PHNT_NATIVE_RECT)
@@ -2336,6 +2350,21 @@ PhPtInRect(
 #else
     return Point.x >= Rect->left && Point.x < Rect->right &&
         Point.y >= Rect->top && Point.y < Rect->bottom;
+#endif
+}
+
+FORCEINLINE
+BOOLEAN
+NTAPI
+PhEqualRect(
+    _In_ CONST PRECT Rect1,
+    _In_ CONST PRECT Rect2
+    )
+{
+#if (PHNT_NATIVE_RECT)
+    return !!EqualRect(Rect1, Rect2);
+#else
+    return RtlEqualMemory(Rect1, Rect2, sizeof(RECT));
 #endif
 }
 
