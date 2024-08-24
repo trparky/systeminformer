@@ -1777,7 +1777,7 @@ VOID PhMwpOnCommand(
 
             PhGetSelectedProcessItems(&processes, &numberOfProcesses);
             PhReferenceObjects(processes, numberOfProcesses);
-            PhMwpExecuteProcessPriorityCommand(Id, processes, numberOfProcesses);
+            PhMwpExecuteProcessPriorityCommand(WindowHandle, Id, processes, numberOfProcesses);
             PhDereferenceObjects(processes, numberOfProcesses);
             PhFree(processes);
         }
@@ -1792,7 +1792,7 @@ VOID PhMwpOnCommand(
 
             PhGetSelectedProcessItems(&processes, &numberOfProcesses);
             PhReferenceObjects(processes, numberOfProcesses);
-            PhMwpExecuteProcessIoPriorityCommand(Id, processes, numberOfProcesses);
+            PhMwpExecuteProcessIoPriorityCommand(WindowHandle, Id, processes, numberOfProcesses);
             PhDereferenceObjects(processes, numberOfProcesses);
             PhFree(processes);
         }
@@ -3934,7 +3934,7 @@ BOOLEAN PhHandleMiniProcessMenuItem(
 
             if (processItem = PhReferenceProcessItem(processId))
             {
-                PhMwpExecuteProcessPriorityCommand(MenuItem->Id, &processItem, 1);
+                PhMwpExecuteProcessPriorityCommand(PhMainWndHandle, MenuItem->Id, &processItem, 1);
                 PhDereferenceObject(processItem);
             }
             else
@@ -3953,7 +3953,7 @@ BOOLEAN PhHandleMiniProcessMenuItem(
 
             if (processItem = PhReferenceProcessItem(processId))
             {
-                PhMwpExecuteProcessIoPriorityCommand(MenuItem->Id, &processItem, 1);
+                PhMwpExecuteProcessIoPriorityCommand(PhMainWndHandle, MenuItem->Id, &processItem, 1);
                 PhDereferenceObject(processItem);
             }
             else
@@ -4155,85 +4155,6 @@ VOID PhShowIconContextMenu(
     }
 
     PhDestroyEMenu(menu);
-}
-
-VOID NTAPI PhpToastCallback(
-    _In_ HRESULT Result,
-    _In_ PH_TOAST_REASON Reason,
-    _In_ PVOID Context
-    )
-{
-    if (Reason == PhToastReasonActivated)
-        PhShowDetailsForIconNotification();
-}
-
-BOOLEAN PhpShowToastNotification(
-    _In_ PWSTR Title,
-    _In_ PWSTR Text,
-    _In_ ULONG Timeout
-    )
-{
-    static PH_INITONCE initOnce = PH_INITONCE_INIT;
-    static PH_STRINGREF iconAppName = PH_STRINGREF_INIT(L"System Informer");
-    static PPH_STRING iconFileName = NULL;
-    HRESULT result;
-    PPH_STRING toastXml;
-    PH_FORMAT format[7];
-
-    if (!PhGetIntegerSetting(L"ToastNotifyEnabled"))
-        return FALSE;
-
-    if (PhBeginInitOnce(&initOnce))
-    {
-        iconFileName = PhGetApplicationDirectoryFileNameZ(L"icon.png", FALSE);
-
-        if (!PhDoesFileExistWin32(PhGetString(iconFileName)))
-            PhClearReference(&iconFileName);
-
-        PhEndInitOnce(&initOnce);
-    }
-
-    if (!iconFileName)
-        return FALSE;
-
-    if (PhInitializeToastRuntime() != S_OK)
-        return FALSE;
-
-    //toastXml = PhFormatString(
-    //    L"<toast>\r\n"
-    //    L"    <visual>\r\n"
-    //    L"       <binding template=\"ToastImageAndText02\">\r\n"
-    //    L"            <image id=\"1\" src=\"%s\" alt=\"red graphic\"/>\r\n"
-    //    L"            <text id=\"1\">%ls</text>\r\n"
-    //    L"            <text id=\"2\">%ls</text>\r\n"
-    //    L"        </binding>\r\n"
-    //    L"    </visual>\r\n"
-    //    L"</toast>",
-    //    PhGetString(iconFileName),
-    //    Title,
-    //    Text
-    //    );
-
-    PhInitFormatS(&format[0], L"<toast><visual><binding template=\"ToastImageAndText02\"><image id=\"1\" src=\"");
-    PhInitFormatSR(&format[1], iconFileName->sr);
-    PhInitFormatS(&format[2], L"\" alt=\"red graphic\"/><text id=\"1\">");
-    PhInitFormatS(&format[3], Title);
-    PhInitFormatS(&format[4], L"</text><text id=\"2\">");
-    PhInitFormatS(&format[5], Text);
-    PhInitFormatS(&format[6], L"</text></binding></visual></toast>");
-    toastXml = PhFormat(format, RTL_NUMBER_OF(format), 0);
-
-    result = PhShowToastStringRef(
-        &iconAppName,
-        &toastXml->sr,
-        Timeout * 1000,
-        PhpToastCallback,
-        NULL
-        );
-
-    PhDereferenceObject(toastXml);
-
-    return HR_SUCCESS(result);
 }
 
 VOID PhShowIconNotification(

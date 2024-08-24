@@ -12,14 +12,12 @@
 
 #include <phapp.h>
 #include <phplug.h>
-#include <mainwnd.h>
-
-#include <emenu.h>
-
 #include <netlist.h>
 #include <netprv.h>
 #include <settings.h>
 
+#include <emenu.h>
+#include <mainwnd.h>
 #include <mainwndp.h>
 
 PPH_MAIN_TAB_PAGE PhMwpNetworkPage;
@@ -125,7 +123,9 @@ BOOLEAN PhMwpNetworkPageCallback(
     case MainTabPageLoadSettings:
         {
             if (PhGetIntegerSetting(L"HideWaitingConnections"))
+            {
                 NetworkFilterEntry = PhAddTreeNewFilter(PhGetFilterSupportNetworkTreeList(), PhMwpNetworkTreeFilter, NULL);
+            }
         }
         return TRUE;
     case MainTabPageSaveSettings:
@@ -403,5 +403,7 @@ VOID PhMwpOnNetworkItemsUpdated(
     PhTickNetworkNodes();
 
     if (count != 0)
+    {
         TreeNew_SetRedraw(PhMwpNetworkTreeNewHandle, TRUE);
+    }
 }

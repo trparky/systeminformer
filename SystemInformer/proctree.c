@@ -112,153 +112,147 @@ VOID PhProcessTreeListInitialization(
 }
 
 VOID PhInitializeProcessTreeList(
-    _In_ HWND hwnd
+    _In_ HWND WindowHandle
     )
 {
-    ProcessTreeListHandle = hwnd;
+    ProcessTreeListHandle = WindowHandle;
     PhSetControlTheme(ProcessTreeListHandle, L"explorer");
-    TreeNew_SetExtendedFlags(hwnd, TN_FLAG_ITEM_DRAG_SELECT, TN_FLAG_ITEM_DRAG_SELECT);
-    SendMessage(TreeNew_GetTooltips(ProcessTreeListHandle), TTM_SETDELAYTIME, TTDT_AUTOPOP, MAXSHORT);
 
-    TreeNew_SetCallback(hwnd, PhpProcessTreeNewCallback, NULL);
-    TreeNew_SetImageList(hwnd, PhProcessSmallImageList);
-
-    TreeNew_SetMaxId(hwnd, PHPRTLC_MAXIMUM - 1);
-
-    TreeNew_SetRedraw(hwnd, FALSE);
+    TreeNew_SetRedraw(WindowHandle, FALSE);
+    TreeNew_SetExtendedFlags(WindowHandle, TN_FLAG_ITEM_DRAG_SELECT, TN_FLAG_ITEM_DRAG_SELECT);
+    TreeNew_SetCallback(WindowHandle, PhpProcessTreeNewCallback, NULL);
+    TreeNew_SetImageList(WindowHandle, PhProcessSmallImageList);
+    TreeNew_SetMaxId(WindowHandle, PHPRTLC_MAXIMUM - 1);
 
     // Default columns
-    PhAddTreeNewColumn(hwnd, PHPRTLC_NAME, TRUE, L"Name", 200, PH_ALIGN_LEFT, (PhGetIntegerSetting(L"ProcessTreeListNameDefault") ? -2 : 0), 0); // HACK (dmex)
-    PhAddTreeNewColumn(hwnd, PHPRTLC_PID, TRUE, L"PID", 50, PH_ALIGN_RIGHT, 0, DT_RIGHT);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_CPU, TRUE, L"CPU", 45, PH_ALIGN_RIGHT, 1, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_IOTOTALRATE, TRUE, L"I/O total rate", 70, PH_ALIGN_RIGHT, 2, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_PRIVATEBYTES, TRUE, L"Private bytes", 70, PH_ALIGN_RIGHT, 3, DT_RIGHT, TRUE);
-    PhAddTreeNewColumn(hwnd, PHPRTLC_USERNAME, TRUE, L"User name", 140, PH_ALIGN_LEFT, 4, DT_PATH_ELLIPSIS);
-    PhAddTreeNewColumn(hwnd, PHPRTLC_DESCRIPTION, TRUE, L"Description", 180, PH_ALIGN_LEFT, 5, 0);
+    PhAddTreeNewColumn(WindowHandle, PHPRTLC_NAME, TRUE, L"Name", 200, PH_ALIGN_LEFT, (PhGetIntegerSetting(L"ProcessTreeListNameDefault") ? -2 : 0), 0); // HACK (dmex)
+    PhAddTreeNewColumn(WindowHandle, PHPRTLC_PID, TRUE, L"PID", 50, PH_ALIGN_RIGHT, 0, DT_RIGHT);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_CPU, TRUE, L"CPU", 45, PH_ALIGN_RIGHT, 1, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_IOTOTALRATE, TRUE, L"I/O total rate", 70, PH_ALIGN_RIGHT, 2, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_PRIVATEBYTES, TRUE, L"Private bytes", 70, PH_ALIGN_RIGHT, 3, DT_RIGHT, TRUE);
+    PhAddTreeNewColumn(WindowHandle, PHPRTLC_USERNAME, TRUE, L"User name", 140, PH_ALIGN_LEFT, 4, DT_PATH_ELLIPSIS);
+    PhAddTreeNewColumn(WindowHandle, PHPRTLC_DESCRIPTION, TRUE, L"Description", 180, PH_ALIGN_LEFT, 5, 0);
 
     // Customizable columns (1)
-    PhAddTreeNewColumn(hwnd, PHPRTLC_COMPANYNAME, FALSE, L"Company name", 180, PH_ALIGN_LEFT, ULONG_MAX, 0);
-    PhAddTreeNewColumn(hwnd, PHPRTLC_VERSION, FALSE, L"Version", 100, PH_ALIGN_LEFT, ULONG_MAX, 0);
-    PhAddTreeNewColumn(hwnd, PHPRTLC_FILENAME, FALSE, L"File name", 180, PH_ALIGN_LEFT, ULONG_MAX, DT_PATH_ELLIPSIS);
-    PhAddTreeNewColumn(hwnd, PHPRTLC_COMMANDLINE, FALSE, L"Command line", 180, PH_ALIGN_LEFT, ULONG_MAX, 0);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_PEAKPRIVATEBYTES, FALSE, L"Peak private bytes", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_WORKINGSET, FALSE, L"Working set", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_PEAKWORKINGSET, FALSE, L"Peak working set", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_PRIVATEWS, FALSE, L"Private WS", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_SHAREDWS, FALSE, L"Shared WS", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_SHAREABLEWS, FALSE, L"Shareable WS", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_VIRTUALSIZE, FALSE, L"Virtual size", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_PEAKVIRTUALSIZE, FALSE, L"Peak virtual size", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_PAGEFAULTS, FALSE, L"Page faults", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumn(hwnd, PHPRTLC_SESSIONID, FALSE, L"Session ID", 45, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_PRIORITYCLASS, FALSE, L"Priority class", 100, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_BASEPRIORITY, FALSE, L"Base priority", 45, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumn(WindowHandle, PHPRTLC_COMPANYNAME, FALSE, L"Company name", 180, PH_ALIGN_LEFT, ULONG_MAX, 0);
+    PhAddTreeNewColumn(WindowHandle, PHPRTLC_VERSION, FALSE, L"Version", 100, PH_ALIGN_LEFT, ULONG_MAX, 0);
+    PhAddTreeNewColumn(WindowHandle, PHPRTLC_FILENAME, FALSE, L"File name", 180, PH_ALIGN_LEFT, ULONG_MAX, DT_PATH_ELLIPSIS);
+    PhAddTreeNewColumn(WindowHandle, PHPRTLC_COMMANDLINE, FALSE, L"Command line", 180, PH_ALIGN_LEFT, ULONG_MAX, 0);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_PEAKPRIVATEBYTES, FALSE, L"Peak private bytes", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_WORKINGSET, FALSE, L"Working set", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_PEAKWORKINGSET, FALSE, L"Peak working set", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_PRIVATEWS, FALSE, L"Private WS", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_SHAREDWS, FALSE, L"Shared WS", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_SHAREABLEWS, FALSE, L"Shareable WS", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_VIRTUALSIZE, FALSE, L"Virtual size", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_PEAKVIRTUALSIZE, FALSE, L"Peak virtual size", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_PAGEFAULTS, FALSE, L"Page faults", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumn(WindowHandle, PHPRTLC_SESSIONID, FALSE, L"Session ID", 45, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_PRIORITYCLASS, FALSE, L"Priority class", 100, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_BASEPRIORITY, FALSE, L"Base priority", 45, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
 
     // Customizable columns (2)
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_THREADS, FALSE, L"Threads", 45, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_HANDLES, FALSE, L"Handles", 45, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_GDIHANDLES, FALSE, L"GDI handles", 45, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_USERHANDLES, FALSE, L"USER handles", 45, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_IORORATE, FALSE, L"I/O read+other rate", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_IOWRATE, FALSE, L"I/O write rate", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumn(hwnd, PHPRTLC_INTEGRITY, FALSE, L"Integrity", 100, PH_ALIGN_LEFT, ULONG_MAX, 0);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_IOPRIORITY, FALSE, L"I/O priority", 70, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_PAGEPRIORITY, FALSE, L"Page priority", 45, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_STARTTIME, FALSE, L"Start time", 100, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_TOTALCPUTIME, FALSE, L"Total CPU time", 90, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_KERNELCPUTIME, FALSE, L"Kernel CPU time", 90, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_USERCPUTIME, FALSE, L"User CPU time", 90, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumn(hwnd, PHPRTLC_VERIFICATIONSTATUS, FALSE, L"Verification status", 70, PH_ALIGN_LEFT, ULONG_MAX, 0);
-    PhAddTreeNewColumn(hwnd, PHPRTLC_VERIFIEDSIGNER, FALSE, L"Verified signer", 100, PH_ALIGN_LEFT, ULONG_MAX, 0);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_ASLR, FALSE, L"ASLR", 50, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
-    PhAddTreeNewColumn(hwnd, PHPRTLC_RELATIVESTARTTIME, FALSE, L"Relative start time", 180, PH_ALIGN_LEFT, ULONG_MAX, 0);
-    PhAddTreeNewColumn(hwnd, PHPRTLC_BITS, FALSE, L"Bits", 50, PH_ALIGN_LEFT, ULONG_MAX, 0);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_ELEVATION, FALSE, L"Elevation", 60, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
-    PhAddTreeNewColumn(hwnd, PHPRTLC_WINDOWTITLE, FALSE, L"Window title", 120, PH_ALIGN_LEFT, ULONG_MAX, 0);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_WINDOWSTATUS, FALSE, L"Window status", 60, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_CYCLES, FALSE, L"Cycles", 110, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_CYCLESDELTA, FALSE, L"Cycles delta", 90, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx2(hwnd, PHPRTLC_CPUHISTORY, FALSE, L"CPU history", 100, PH_ALIGN_LEFT, ULONG_MAX, 0, TN_COLUMN_FLAG_CUSTOMDRAW | TN_COLUMN_FLAG_SORTDESCENDING);
-    PhAddTreeNewColumnEx2(hwnd, PHPRTLC_PRIVATEBYTESHISTORY, FALSE, L"Private bytes history", 100, PH_ALIGN_LEFT, ULONG_MAX, 0, TN_COLUMN_FLAG_CUSTOMDRAW | TN_COLUMN_FLAG_SORTDESCENDING);
-    PhAddTreeNewColumnEx2(hwnd, PHPRTLC_IOHISTORY, FALSE, L"I/O history", 100, PH_ALIGN_LEFT, ULONG_MAX, 0, TN_COLUMN_FLAG_CUSTOMDRAW | TN_COLUMN_FLAG_SORTDESCENDING);
-    PhAddTreeNewColumn(hwnd, PHPRTLC_DEP, FALSE, L"DEP", 100, PH_ALIGN_LEFT, ULONG_MAX, 0);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_VIRTUALIZED, FALSE, L"Virtualized", 80, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_CONTEXTSWITCHES, FALSE, L"Context switches", 100, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_CONTEXTSWITCHESDELTA, FALSE, L"Context switches delta", 80, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_PAGEFAULTSDELTA, FALSE, L"Page faults delta", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_THREADS, FALSE, L"Threads", 45, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_HANDLES, FALSE, L"Handles", 45, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_GDIHANDLES, FALSE, L"GDI handles", 45, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_USERHANDLES, FALSE, L"USER handles", 45, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_IORORATE, FALSE, L"I/O read+other rate", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_IOWRATE, FALSE, L"I/O write rate", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumn(WindowHandle, PHPRTLC_INTEGRITY, FALSE, L"Integrity", 100, PH_ALIGN_LEFT, ULONG_MAX, 0);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_IOPRIORITY, FALSE, L"I/O priority", 70, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_PAGEPRIORITY, FALSE, L"Page priority", 45, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_STARTTIME, FALSE, L"Start time", 100, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_TOTALCPUTIME, FALSE, L"Total CPU time", 90, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_KERNELCPUTIME, FALSE, L"Kernel CPU time", 90, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_USERCPUTIME, FALSE, L"User CPU time", 90, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumn(WindowHandle, PHPRTLC_VERIFICATIONSTATUS, FALSE, L"Verification status", 70, PH_ALIGN_LEFT, ULONG_MAX, 0);
+    PhAddTreeNewColumn(WindowHandle, PHPRTLC_VERIFIEDSIGNER, FALSE, L"Verified signer", 100, PH_ALIGN_LEFT, ULONG_MAX, 0);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_ASLR, FALSE, L"ASLR", 50, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
+    PhAddTreeNewColumn(WindowHandle, PHPRTLC_RELATIVESTARTTIME, FALSE, L"Relative start time", 180, PH_ALIGN_LEFT, ULONG_MAX, 0);
+    PhAddTreeNewColumn(WindowHandle, PHPRTLC_BITS, FALSE, L"Bits", 50, PH_ALIGN_LEFT, ULONG_MAX, 0);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_ELEVATION, FALSE, L"Elevation", 60, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
+    PhAddTreeNewColumn(WindowHandle, PHPRTLC_WINDOWTITLE, FALSE, L"Window title", 120, PH_ALIGN_LEFT, ULONG_MAX, 0);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_WINDOWSTATUS, FALSE, L"Window status", 60, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_CYCLES, FALSE, L"Cycles", 110, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_CYCLESDELTA, FALSE, L"Cycles delta", 90, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx2(WindowHandle, PHPRTLC_CPUHISTORY, FALSE, L"CPU history", 100, PH_ALIGN_LEFT, ULONG_MAX, 0, TN_COLUMN_FLAG_CUSTOMDRAW | TN_COLUMN_FLAG_SORTDESCENDING);
+    PhAddTreeNewColumnEx2(WindowHandle, PHPRTLC_PRIVATEBYTESHISTORY, FALSE, L"Private bytes history", 100, PH_ALIGN_LEFT, ULONG_MAX, 0, TN_COLUMN_FLAG_CUSTOMDRAW | TN_COLUMN_FLAG_SORTDESCENDING);
+    PhAddTreeNewColumnEx2(WindowHandle, PHPRTLC_IOHISTORY, FALSE, L"I/O history", 100, PH_ALIGN_LEFT, ULONG_MAX, 0, TN_COLUMN_FLAG_CUSTOMDRAW | TN_COLUMN_FLAG_SORTDESCENDING);
+    PhAddTreeNewColumn(WindowHandle, PHPRTLC_DEP, FALSE, L"DEP", 100, PH_ALIGN_LEFT, ULONG_MAX, 0);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_VIRTUALIZED, FALSE, L"Virtualized", 80, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_CONTEXTSWITCHES, FALSE, L"Context switches", 100, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_CONTEXTSWITCHESDELTA, FALSE, L"Context switches delta", 80, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_PAGEFAULTSDELTA, FALSE, L"Page faults delta", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
 
     // I/O group columns
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_IOREADS, FALSE, L"I/O reads", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_IOWRITES, FALSE, L"I/O writes", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_IOOTHER, FALSE, L"I/O other", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_IOREADBYTES, FALSE, L"I/O read bytes", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_IOWRITEBYTES, FALSE, L"I/O write bytes", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_IOOTHERBYTES, FALSE, L"I/O other bytes", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_IOREADSDELTA, FALSE, L"I/O reads delta", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_IOWRITESDELTA, FALSE, L"I/O writes delta", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_IOOTHERDELTA, FALSE, L"I/O other delta", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_IOREADS, FALSE, L"I/O reads", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_IOWRITES, FALSE, L"I/O writes", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_IOOTHER, FALSE, L"I/O other", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_IOREADBYTES, FALSE, L"I/O read bytes", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_IOWRITEBYTES, FALSE, L"I/O write bytes", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_IOOTHERBYTES, FALSE, L"I/O other bytes", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_IOREADSDELTA, FALSE, L"I/O reads delta", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_IOWRITESDELTA, FALSE, L"I/O writes delta", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_IOOTHERDELTA, FALSE, L"I/O other delta", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
 
     // Customizable columns (3)
-    PhAddTreeNewColumn(hwnd, PHPRTLC_OSCONTEXT, FALSE, L"OS context", 100, PH_ALIGN_LEFT, ULONG_MAX, 0);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_PAGEDPOOL, FALSE, L"Paged pool", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_PEAKPAGEDPOOL, FALSE, L"Peak paged pool", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_NONPAGEDPOOL, FALSE, L"Non-paged pool", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_PEAKNONPAGEDPOOL, FALSE, L"Peak non-paged pool", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_MINIMUMWORKINGSET, FALSE, L"Minimum working set", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_MAXIMUMWORKINGSET, FALSE, L"Maximum working set", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_PRIVATEBYTESDELTA, FALSE, L"Private bytes delta", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumn(hwnd, PHPRTLC_SUBSYSTEM, FALSE, L"Subsystem", 110, PH_ALIGN_LEFT, ULONG_MAX, 0);
-    PhAddTreeNewColumn(hwnd, PHPRTLC_PACKAGENAME, FALSE, L"Package name", 160, PH_ALIGN_LEFT, ULONG_MAX, 0);
-    PhAddTreeNewColumn(hwnd, PHPRTLC_APPID, FALSE, L"App ID", 160, PH_ALIGN_LEFT, ULONG_MAX, 0);
-    PhAddTreeNewColumn(hwnd, PHPRTLC_DPIAWARENESS, FALSE, L"DPI awareness", 110, PH_ALIGN_LEFT, ULONG_MAX, 0);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_CFGUARD, FALSE, L"CF Guard", 70, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_TIMESTAMP, FALSE, L"Time stamp", 140, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_FILEMODIFIEDTIME, FALSE, L"File modified time", 140, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_FILESIZE, FALSE, L"File size", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_SUBPROCESSCOUNT, FALSE, L"Subprocesses", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_JOBOBJECTID, FALSE, L"Job Object ID", 50, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_PROTECTION, FALSE, L"Protection", 105, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_DESKTOP, FALSE, L"Desktop", 80, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_CRITICAL, FALSE, L"Critical", 80, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_PIDHEX, FALSE, L"PID (Hex)", 50, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_CPUCORECYCLES, FALSE, L"CPU (relative)", 45, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_CET, FALSE, L"CET", 45, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_IMAGE_COHERENCY, FALSE, L"Image coherency", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_ERRORMODE, FALSE, L"Error mode", 70, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_CODEPAGE, FALSE, L"Code page", 70, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
-    PhAddTreeNewColumnEx2(hwnd, PHPRTLC_TIMELINE, FALSE, L"Timeline", 100, PH_ALIGN_LEFT, ULONG_MAX, 0, TN_COLUMN_FLAG_CUSTOMDRAW | TN_COLUMN_FLAG_SORTDESCENDING);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_POWERTHROTTLING, FALSE, L"Power throttling", 70, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_ARCHITECTURE, FALSE, L"Architecture", 70, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
-    PhAddTreeNewColumn(hwnd, PHPRTLC_PARENTPID, FALSE, L"Parent PID", 50, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT);
-    PhAddTreeNewColumn(hwnd, PHPRTLC_PARENTCONSOLEPID, FALSE, L"Parent console PID", 50, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_COMMITSIZE, FALSE, L"Shared commit", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_PRIORITYBOOST, FALSE, L"Priority boost", 45, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_CPUAVERAGE, FALSE, L"CPU (average)", 50, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_CPUKERNEL, FALSE, L"CPU (kernel)", 50, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumnEx(hwnd, PHPRTLC_CPUUSER, FALSE, L"CPU (user)", 50, PH_ALIGN_LEFT, ULONG_MAX, DT_RIGHT, TRUE);
-    PhAddTreeNewColumn(hwnd, PHPRTLC_GRANTEDACCESS, FALSE, L"Granted access (symbolic)", 50, PH_ALIGN_LEFT, ULONG_MAX, 0);
-    PhAddTreeNewColumn(hwnd, PHPRTLC_TLSBITMAPDELTA, FALSE, L"Thread local storage", 50, PH_ALIGN_LEFT, ULONG_MAX, 0);
-    PhAddTreeNewColumn(hwnd, PHPRTLC_REFERENCEDELTA, FALSE, L"References", 50, PH_ALIGN_LEFT, ULONG_MAX, 0);
-    PhAddTreeNewColumn(hwnd, PHPRTLC_LXSSPID, FALSE, L"PID (LXSS)", 50, PH_ALIGN_LEFT, ULONG_MAX, 0);
-    PhAddTreeNewColumn(hwnd, PHPRTLC_START_KEY, FALSE, L"Start key", 120, PH_ALIGN_LEFT, ULONG_MAX, 0);
+    PhAddTreeNewColumn(WindowHandle, PHPRTLC_OSCONTEXT, FALSE, L"OS context", 100, PH_ALIGN_LEFT, ULONG_MAX, 0);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_PAGEDPOOL, FALSE, L"Paged pool", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_PEAKPAGEDPOOL, FALSE, L"Peak paged pool", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_NONPAGEDPOOL, FALSE, L"Non-paged pool", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_PEAKNONPAGEDPOOL, FALSE, L"Peak non-paged pool", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_MINIMUMWORKINGSET, FALSE, L"Minimum working set", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_MAXIMUMWORKINGSET, FALSE, L"Maximum working set", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_PRIVATEBYTESDELTA, FALSE, L"Private bytes delta", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumn(WindowHandle, PHPRTLC_SUBSYSTEM, FALSE, L"Subsystem", 110, PH_ALIGN_LEFT, ULONG_MAX, 0);
+    PhAddTreeNewColumn(WindowHandle, PHPRTLC_PACKAGENAME, FALSE, L"Package name", 160, PH_ALIGN_LEFT, ULONG_MAX, 0);
+    PhAddTreeNewColumn(WindowHandle, PHPRTLC_APPID, FALSE, L"App ID", 160, PH_ALIGN_LEFT, ULONG_MAX, 0);
+    PhAddTreeNewColumn(WindowHandle, PHPRTLC_DPIAWARENESS, FALSE, L"DPI awareness", 110, PH_ALIGN_LEFT, ULONG_MAX, 0);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_CFGUARD, FALSE, L"CF Guard", 70, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_TIMESTAMP, FALSE, L"Time stamp", 140, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_FILEMODIFIEDTIME, FALSE, L"File modified time", 140, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_FILESIZE, FALSE, L"File size", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_SUBPROCESSCOUNT, FALSE, L"Subprocesses", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_JOBOBJECTID, FALSE, L"Job Object ID", 50, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_PROTECTION, FALSE, L"Protection", 105, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_DESKTOP, FALSE, L"Desktop", 80, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_CRITICAL, FALSE, L"Critical", 80, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_PIDHEX, FALSE, L"PID (Hex)", 50, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_CPUCORECYCLES, FALSE, L"CPU (relative)", 45, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_CET, FALSE, L"CET", 45, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_IMAGE_COHERENCY, FALSE, L"Image coherency", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_ERRORMODE, FALSE, L"Error mode", 70, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_CODEPAGE, FALSE, L"Code page", 70, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
+    PhAddTreeNewColumnEx2(WindowHandle, PHPRTLC_TIMELINE, FALSE, L"Timeline", 100, PH_ALIGN_LEFT, ULONG_MAX, 0, TN_COLUMN_FLAG_CUSTOMDRAW | TN_COLUMN_FLAG_SORTDESCENDING);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_POWERTHROTTLING, FALSE, L"Power throttling", 70, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_ARCHITECTURE, FALSE, L"Architecture", 70, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
+    PhAddTreeNewColumn(WindowHandle, PHPRTLC_PARENTPID, FALSE, L"Parent PID", 50, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT);
+    PhAddTreeNewColumn(WindowHandle, PHPRTLC_PARENTCONSOLEPID, FALSE, L"Parent console PID", 50, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_COMMITSIZE, FALSE, L"Shared commit", 70, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_PRIORITYBOOST, FALSE, L"Priority boost", 45, PH_ALIGN_LEFT, ULONG_MAX, 0, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_CPUAVERAGE, FALSE, L"CPU (average)", 50, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_CPUKERNEL, FALSE, L"CPU (kernel)", 50, PH_ALIGN_RIGHT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumnEx(WindowHandle, PHPRTLC_CPUUSER, FALSE, L"CPU (user)", 50, PH_ALIGN_LEFT, ULONG_MAX, DT_RIGHT, TRUE);
+    PhAddTreeNewColumn(WindowHandle, PHPRTLC_GRANTEDACCESS, FALSE, L"Granted access (symbolic)", 50, PH_ALIGN_LEFT, ULONG_MAX, 0);
+    PhAddTreeNewColumn(WindowHandle, PHPRTLC_TLSBITMAPDELTA, FALSE, L"Thread local storage", 50, PH_ALIGN_LEFT, ULONG_MAX, 0);
+    PhAddTreeNewColumn(WindowHandle, PHPRTLC_REFERENCEDELTA, FALSE, L"References", 50, PH_ALIGN_LEFT, ULONG_MAX, 0);
+    PhAddTreeNewColumn(WindowHandle, PHPRTLC_LXSSPID, FALSE, L"PID (LXSS)", 50, PH_ALIGN_LEFT, ULONG_MAX, 0);
+    PhAddTreeNewColumn(WindowHandle, PHPRTLC_START_KEY, FALSE, L"Start key", 120, PH_ALIGN_LEFT, ULONG_MAX, 0);
 
-    TreeNew_SetRedraw(hwnd, TRUE);
+    PhCmInitializeManager(&ProcessTreeListCm, WindowHandle, PHPRTLC_MAXIMUM, PhpProcessTreeNewPostSortFunction);
+    PhInitializeTreeNewFilterSupport(&FilterSupport, WindowHandle, ProcessNodeList);
 
-    TreeNew_SetTriState(hwnd, TRUE);
-    TreeNew_SetSort(hwnd, 0, NoSortOrder);
-
-    PhCmInitializeManager(&ProcessTreeListCm, hwnd, PHPRTLC_MAXIMUM, PhpProcessTreeNewPostSortFunction);
+    TreeNew_SetTriState(WindowHandle, TRUE);
+    TreeNew_SetRedraw(WindowHandle, TRUE);
 
     if (PhPluginsEnabled)
     {
         PH_PLUGIN_TREENEW_INFORMATION treeNewInfo;
 
-        treeNewInfo.TreeNewHandle = hwnd;
+        treeNewInfo.TreeNewHandle = WindowHandle;
         treeNewInfo.CmData = &ProcessTreeListCm;
         PhInvokeCallback(PhGetGeneralCallback(GeneralCallbackProcessTreeNewInitializing), &treeNewInfo);
     }
-
-    PhInitializeTreeNewFilterSupport(&FilterSupport, hwnd, ProcessNodeList);
 }
 
 VOID PhInitializeProcessTreeColumnHeaderCache(
@@ -656,6 +650,7 @@ VOID PhpRemoveProcessNode(
     PhClearReference(&ProcessNode->StartTimeText);
     PhClearReference(&ProcessNode->RelativeStartTimeText);
     PhClearReference(&ProcessNode->WindowTitleText);
+    PhClearReference(&ProcessNode->DepStatusText);
     PhClearReference(&ProcessNode->CyclesText);
     PhClearReference(&ProcessNode->CyclesDeltaText);
     PhClearReference(&ProcessNode->ContextSwitchesText);
@@ -693,6 +688,8 @@ VOID PhpRemoveProcessNode(
     PhClearReference(&ProcessNode->GrantedAccessText);
     PhClearReference(&ProcessNode->TlsBitmapDeltaText);
     PhClearReference(&ProcessNode->ReferenceCountText);
+    PhClearReference(&ProcessNode->LxssProcessIdText);
+    PhClearReference(&ProcessNode->ProcessStartKeyText);
 
     PhDeleteGraphBuffers(&ProcessNode->CpuGraphBuffers);
     PhDeleteGraphBuffers(&ProcessNode->PrivateGraphBuffers);
@@ -2730,16 +2727,6 @@ BOOLEAN NTAPI PhpProcessTreeNewCallback(
                     }
                 }
                 break;
-            case PHPRTLC_LXSSPID:
-                {
-                    PhInitializeStringRefLongHint(&getCellText->Text, processItem->LxssProcessIdString);
-                }
-                break;
-            case PHPRTLC_START_KEY:
-                {
-                    PhInitializeStringRefLongHint(&getCellText->Text, processItem->ProcessStartKeyString);
-                }
-                break;
             case PHPRTLC_CPU:
                 {
                     FLOAT cpuUsage = 0;
@@ -2840,8 +2827,10 @@ BOOLEAN NTAPI PhpProcessTreeNewCallback(
                 getCellText->Text = PhGetStringRef(processItem->CommandLine);
                 break;
             case PHPRTLC_PEAKPRIVATEBYTES:
-                PhMoveReference(&node->PeakPrivateBytesText, PhFormatSize(processItem->VmCounters.PeakPagefileUsage, ULONG_MAX));
-                getCellText->Text = node->PeakPrivateBytesText->sr;
+                {
+                    PhMoveReference(&node->PeakPrivateBytesText, PhFormatSize(processItem->VmCounters.PeakPagefileUsage, ULONG_MAX));
+                    getCellText->Text = node->PeakPrivateBytesText->sr;
+                }
                 break;
             case PHPRTLC_WORKINGSET:
                 {
@@ -2852,8 +2841,10 @@ BOOLEAN NTAPI PhpProcessTreeNewCallback(
                 }
                 break;
             case PHPRTLC_PEAKWORKINGSET:
-                PhMoveReference(&node->PeakWorkingSetText, PhFormatSize(processItem->VmCounters.PeakWorkingSetSize, ULONG_MAX));
-                getCellText->Text = node->PeakWorkingSetText->sr;
+                {
+                    PhMoveReference(&node->PeakWorkingSetText, PhFormatSize(processItem->VmCounters.PeakWorkingSetSize, ULONG_MAX));
+                    getCellText->Text = node->PeakWorkingSetText->sr;
+                }
                 break;
             case PHPRTLC_PRIVATEWS:
                 {
@@ -2864,14 +2855,18 @@ BOOLEAN NTAPI PhpProcessTreeNewCallback(
                 }
                 break;
             case PHPRTLC_SHAREDWS:
-                PhpUpdateProcessNodeWsCounters(node);
-                PhMoveReference(&node->SharedWsText, PhFormatSize((ULONG64)node->WsCounters.NumberOfSharedPages * PAGE_SIZE, ULONG_MAX));
-                getCellText->Text = node->SharedWsText->sr;
+                {
+                    PhpUpdateProcessNodeWsCounters(node);
+                    PhMoveReference(&node->SharedWsText, PhFormatSize((ULONG64)node->WsCounters.NumberOfSharedPages * PAGE_SIZE, ULONG_MAX));
+                    getCellText->Text = node->SharedWsText->sr;
+                }
                 break;
             case PHPRTLC_SHAREABLEWS:
-                PhpUpdateProcessNodeWsCounters(node);
-                PhMoveReference(&node->ShareableWsText, PhFormatSize((ULONG64)node->WsCounters.NumberOfShareablePages * PAGE_SIZE, ULONG_MAX));
-                getCellText->Text = node->ShareableWsText->sr;
+                {
+                    PhpUpdateProcessNodeWsCounters(node);
+                    PhMoveReference(&node->ShareableWsText, PhFormatSize((ULONG64)node->WsCounters.NumberOfShareablePages * PAGE_SIZE, ULONG_MAX));
+                    getCellText->Text = node->ShareableWsText->sr;
+                }
                 break;
             case PHPRTLC_VIRTUALSIZE:
                 {
@@ -2882,8 +2877,10 @@ BOOLEAN NTAPI PhpProcessTreeNewCallback(
                 }
                 break;
             case PHPRTLC_PEAKVIRTUALSIZE:
-                PhMoveReference(&node->PeakVirtualSizeText, PhFormatSize(processItem->VmCounters.PeakVirtualSize, ULONG_MAX));
-                getCellText->Text = node->PeakVirtualSizeText->sr;
+                {
+                    PhMoveReference(&node->PeakVirtualSizeText, PhFormatSize(processItem->VmCounters.PeakVirtualSize, ULONG_MAX));
+                    getCellText->Text = node->PeakVirtualSizeText->sr;
+                }
                 break;
             case PHPRTLC_PAGEFAULTS:
                 {
@@ -3005,8 +3002,10 @@ BOOLEAN NTAPI PhpProcessTreeNewCallback(
                 }
                 break;
             case PHPRTLC_INTEGRITY:
-                if (processItem->IntegrityString)
-                    PhInitializeStringRefLongHint(&getCellText->Text, processItem->IntegrityString);
+                {
+                    if (processItem->IntegrityString)
+                        PhInitializeStringRefLongHint(&getCellText->Text, processItem->IntegrityString);
+                }
                 break;
             case PHPRTLC_IOPRIORITY:
                 {
@@ -3035,13 +3034,15 @@ BOOLEAN NTAPI PhpProcessTreeNewCallback(
                 }
                 break;
             case PHPRTLC_STARTTIME:
-                if (processItem->CreateTime.QuadPart != 0)
                 {
-                    SYSTEMTIME systemTime;
+                    if (processItem->CreateTime.QuadPart != 0)
+                    {
+                        SYSTEMTIME systemTime;
 
-                    PhLargeIntegerToLocalSystemTime(&systemTime, &processItem->CreateTime);
-                    PhMoveReference(&node->StartTimeText, PhFormatDateTime(&systemTime));
-                    getCellText->Text = node->StartTimeText->sr;
+                        PhLargeIntegerToLocalSystemTime(&systemTime, &processItem->CreateTime);
+                        PhMoveReference(&node->StartTimeText, PhFormatDateTime(&systemTime));
+                        getCellText->Text = node->StartTimeText->sr;
+                    }
                 }
                 break;
             case PHPRTLC_TOTALCPUTIME:
@@ -3096,21 +3097,30 @@ BOOLEAN NTAPI PhpProcessTreeNewCallback(
                 }
                 break;
             case PHPRTLC_VERIFICATIONSTATUS:
-                if (PhEnableProcessQueryStage2)
-                    getCellText->Text = PhVerifyResultToStringRef(processItem->VerifyResult);
-                else
-                    PhInitializeStringRef(&getCellText->Text, L"Image digital signature support disabled.");
+                {
+                    if (PhEnableProcessQueryStage2)
+                        getCellText->Text = PhVerifyResultToStringRef(processItem->VerifyResult);
+                    else
+                        PhInitializeStringRef(&getCellText->Text, L"Image digital signature support disabled.");
+                }
                 break;
             case PHPRTLC_VERIFIEDSIGNER:
-                if (PhEnableProcessQueryStage2)
-                    getCellText->Text = PhGetStringRef(processItem->VerifySignerName);
-                else
-                    PhInitializeStringRef(&getCellText->Text, L"Image digital signature support disabled.");
+                {
+                    if (PhEnableProcessQueryStage2)
+                        getCellText->Text = PhGetStringRef(processItem->VerifySignerName);
+                    else
+                        PhInitializeStringRef(&getCellText->Text, L"Image digital signature support disabled.");
+                }
                 break;
             case PHPRTLC_ASLR:
-                PhpUpdateProcessNodeImage(node);
-                if (node->ImageDllCharacteristics & IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE)
-                    PhInitializeStringRef(&getCellText->Text, L"ASLR");
+                {
+                    PhpUpdateProcessNodeImage(node);
+
+                    if (FlagOn(node->ImageDllCharacteristics, IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE))
+                        PhInitializeStringRef(&getCellText->Text, L"ASLR");
+                    else
+                        PhInitializeEmptyStringRef(&getCellText->Text);
+                }
                 break;
             case PHPRTLC_RELATIVESTARTTIME:
                 {
@@ -3122,19 +3132,30 @@ BOOLEAN NTAPI PhpProcessTreeNewCallback(
 
                         if (PhGetIntegerSetting(L"EnableShortRelativeStartTime"))
                         {
-                            PPH_STRING startTimeString;
-
-                            startTimeString = PhFormatTimeSpan(currentTime.QuadPart - processItem->CreateTime.QuadPart, PH_TIMESPAN_DHMS);
-                            PhMoveReference(&node->RelativeStartTimeText, startTimeString);
+                            if (processItem->CreateTime.QuadPart < currentTime.QuadPart)
+                            {
+                                ULONG64 relativeCreateTime = currentTime.QuadPart - processItem->CreateTime.QuadPart;
+                                PhMoveReference(&node->RelativeStartTimeText, PhFormatTimeSpan(relativeCreateTime, PH_TIMESPAN_DHMS));
+                            }
+                            else
+                            {
+                                PhMoveReference(&node->RelativeStartTimeText, PhCreateString(L"\u221E"));
+                            }
                         }
                         else
                         {
                             PPH_STRING startTimeString;
 
-                            startTimeString = PhFormatTimeSpanRelative(currentTime.QuadPart - processItem->CreateTime.QuadPart);
-                            PhMoveReference(&node->RelativeStartTimeText, PhConcatStrings2(startTimeString->Buffer, L" ago"));
-
-                            PhDereferenceObject(startTimeString);
+                            if (processItem->CreateTime.QuadPart < currentTime.QuadPart)
+                            {
+                                startTimeString = PhFormatTimeSpanRelative(currentTime.QuadPart - processItem->CreateTime.QuadPart);
+                                PhMoveReference(&node->RelativeStartTimeText, PhConcatStringRefZ(&startTimeString->sr, L" ago"));
+                                PhDereferenceObject(startTimeString);
+                            }
+                            else
+                            {
+                                PhMoveReference(&node->RelativeStartTimeText, PhCreateString(L"\u221E"));
+                            }
                         }
 
                         getCellText->Text = node->RelativeStartTimeText->sr;
@@ -3142,11 +3163,13 @@ BOOLEAN NTAPI PhpProcessTreeNewCallback(
                 }
                 break;
             case PHPRTLC_BITS:
+                {
 #ifdef _WIN64
-                PhInitializeStringRef(&getCellText->Text, processItem->IsWow64 ? L"32" : L"64");
+                    PhInitializeStringRef(&getCellText->Text, processItem->IsWow64Process ? L"32" : L"64");
 #else
-                PhInitializeStringRef(&getCellText->Text, L"32");
+                    PhInitializeStringRef(&getCellText->Text, L"32");
 #endif
+                }
                 break;
             case PHPRTLC_ELEVATION:
                 {
@@ -3164,16 +3187,21 @@ BOOLEAN NTAPI PhpProcessTreeNewCallback(
                 }
                 break;
             case PHPRTLC_WINDOWTITLE:
-                PhpUpdateProcessNodeWindow(node);
-                PhSwapReference(&node->WindowTitleText, node->WindowText);
-                getCellText->Text = PhGetStringRef(node->WindowTitleText);
+                {
+                    PhpUpdateProcessNodeWindow(node);
+                    PhSwapReference(&node->WindowTitleText, node->WindowText);
+                    getCellText->Text = PhGetStringRef(node->WindowTitleText);
+                }
                 break;
             case PHPRTLC_WINDOWSTATUS:
-                PhpUpdateProcessNodeWindow(node);
+                {
+                    PhpUpdateProcessNodeWindow(node);
 
-                if (node->WindowHandle)
-                    PhInitializeStringRef(&getCellText->Text, node->WindowHung ? L"Not responding" : L"Running");
-
+                    if (node->WindowHandle)
+                        PhInitializeStringRef(&getCellText->Text, node->WindowHung ? L"Not responding" : L"Running");
+                    else
+                        PhInitializeEmptyStringRef(&getCellText->Text);
+                }
                 break;
             case PHPRTLC_CYCLES:
                 {
@@ -3200,23 +3228,45 @@ BOOLEAN NTAPI PhpProcessTreeNewCallback(
                 }
                 break;
             case PHPRTLC_DEP:
-                PhpUpdateProcessNodeDepStatus(node);
-
-                if (node->DepStatus & PH_PROCESS_DEP_ENABLED)
                 {
-                    if (node->DepStatus & PH_PROCESS_DEP_PERMANENT)
-                        PhInitializeStringRef(&getCellText->Text, L"DEP (permanent)");
-                    else
-                        PhInitializeStringRef(&getCellText->Text, L"DEP");
-                }
+                    PH_STRING_BUILDER sb;
 
+                    PhpUpdateProcessNodeDepStatus(node);
+
+                    PhInitializeStringBuilder(&sb, 20);
+
+                    if (FlagOn(node->DepStatus, PH_PROCESS_DEP_ENABLED))
+                    {
+                        if (FlagOn(node->DepStatus, PH_PROCESS_DEP_PERMANENT))
+                            PhAppendStringBuilder2(&sb, L"DEP (permanent), ");
+                        else
+                            PhAppendStringBuilder2(&sb, L"DEP, ");
+                    }
+
+                    if (FlagOn(node->DepStatus, PH_PROCESS_DEP_ATL_THUNK_EMULATION_DISABLED))
+                        PhAppendStringBuilder2(&sb, L"ATL emulation, ");
+                    if (FlagOn(node->DepStatus, PH_PROCESS_DEP_EXECUTE_ENABLED))
+                        PhAppendStringBuilder2(&sb, L"Execute enabled, ");
+                    if (FlagOn(node->DepStatus, PH_PROCESS_DEP_IMAGE_ENABLED))
+                        PhAppendStringBuilder2(&sb, L"Image enabled, ");
+                    if (FlagOn(node->DepStatus, PH_PROCESS_DEP_DISABLE_EXCEPTION_CHAIN))
+                        PhAppendStringBuilder2(&sb, L"Chain disabled, ");
+
+                    if (PhEndsWithString2(sb.String, L", ", FALSE))
+                        PhRemoveEndStringBuilder(&sb, 2);
+
+                    PhMoveReference(&node->DepStatusText, PhFinalStringBuilderString(&sb));
+                }
                 break;
             case PHPRTLC_VIRTUALIZED:
-                PhpUpdateProcessNodeToken(node);
+                {
+                    PhpUpdateProcessNodeToken(node);
 
-                if (node->VirtualizationEnabled)
-                    PhInitializeStringRef(&getCellText->Text, L"Virtualized");
-
+                    if (node->VirtualizationEnabled)
+                        PhInitializeStringRef(&getCellText->Text, L"Virtualized");
+                    else
+                        PhInitializeEmptyStringRef(&getCellText->Text);
+                }
                 break;
             case PHPRTLC_CONTEXTSWITCHES:
                 {
@@ -3231,15 +3281,17 @@ BOOLEAN NTAPI PhpProcessTreeNewCallback(
                 }
                 break;
             case PHPRTLC_CONTEXTSWITCHESDELTA:
-                if ((LONG)processItem->ContextSwitchesDelta.Delta >= 0) // the delta may be negative if a thread exits - just don't show anything
                 {
-                    ULONG value = 0;
-                    PhpAggregateFieldIfNeeded(node, AggregateTypeInt32, AggregateLocationProcessItem, FIELD_OFFSET(PH_PROCESS_ITEM, ContextSwitchesDelta.Delta), &value);
-
-                    if (value != 0)
+                    if ((LONG)processItem->ContextSwitchesDelta.Delta >= 0) // the delta may be negative if a thread exits - just don't show anything
                     {
-                        PhMoveReference(&node->ContextSwitchesDeltaText, PhFormatUInt64(value, TRUE));
-                        getCellText->Text = node->ContextSwitchesDeltaText->sr;
+                        ULONG value = 0;
+                        PhpAggregateFieldIfNeeded(node, AggregateTypeInt32, AggregateLocationProcessItem, FIELD_OFFSET(PH_PROCESS_ITEM, ContextSwitchesDelta.Delta), &value);
+
+                        if (value != 0)
+                        {
+                            PhMoveReference(&node->ContextSwitchesDeltaText, PhFormatUInt64(value, TRUE));
+                            getCellText->Text = node->ContextSwitchesDeltaText->sr;
+                        }
                     }
                 }
                 break;
@@ -3364,27 +3416,29 @@ BOOLEAN NTAPI PhpProcessTreeNewCallback(
                 }
                 break;
             case PHPRTLC_OSCONTEXT:
-                PhpUpdateProcessOsContext(node);
-                switch (node->OsContextVersion)
                 {
-                case WINDOWS_10:
-                    PhInitializeStringRef(&getCellText->Text, L"Windows 10");
-                    break;
-                case WINDOWS_8_1:
-                    PhInitializeStringRef(&getCellText->Text, L"Windows 8.1");
-                    break;
-                case WINDOWS_8:
-                    PhInitializeStringRef(&getCellText->Text, L"Windows 8");
-                    break;
-                case WINDOWS_7:
-                    PhInitializeStringRef(&getCellText->Text, L"Windows 7");
-                    break;
-                case WINDOWS_VISTA:
-                    PhInitializeStringRef(&getCellText->Text, L"Windows Vista");
-                    break;
-                case WINDOWS_XP:
-                    PhInitializeStringRef(&getCellText->Text, L"Windows XP");
-                    break;
+                    PhpUpdateProcessOsContext(node);
+                    switch (node->OsContextVersion)
+                    {
+                    case WINDOWS_10:
+                        PhInitializeStringRef(&getCellText->Text, L"Windows 10");
+                        break;
+                    case WINDOWS_8_1:
+                        PhInitializeStringRef(&getCellText->Text, L"Windows 8.1");
+                        break;
+                    case WINDOWS_8:
+                        PhInitializeStringRef(&getCellText->Text, L"Windows 8");
+                        break;
+                    case WINDOWS_7:
+                        PhInitializeStringRef(&getCellText->Text, L"Windows 7");
+                        break;
+                    case WINDOWS_VISTA:
+                        PhInitializeStringRef(&getCellText->Text, L"Windows Vista");
+                        break;
+                    case WINDOWS_XP:
+                        PhInitializeStringRef(&getCellText->Text, L"Windows XP");
+                        break;
+                    }
                 }
                 break;
             case PHPRTLC_PAGEDPOOL:
@@ -3396,8 +3450,10 @@ BOOLEAN NTAPI PhpProcessTreeNewCallback(
                 }
                 break;
             case PHPRTLC_PEAKPAGEDPOOL:
-                PhMoveReference(&node->PeakPagedPoolText, PhFormatSize(processItem->VmCounters.QuotaPeakPagedPoolUsage, ULONG_MAX));
-                getCellText->Text = node->PeakPagedPoolText->sr;
+                {
+                    PhMoveReference(&node->PeakPagedPoolText, PhFormatSize(processItem->VmCounters.QuotaPeakPagedPoolUsage, ULONG_MAX));
+                    getCellText->Text = node->PeakPagedPoolText->sr;
+                }
                 break;
             case PHPRTLC_NONPAGEDPOOL:
                 {
@@ -3408,8 +3464,10 @@ BOOLEAN NTAPI PhpProcessTreeNewCallback(
                 }
                 break;
             case PHPRTLC_PEAKNONPAGEDPOOL:
-                PhMoveReference(&node->PeakNonPagedPoolText, PhFormatSize(processItem->VmCounters.QuotaPeakNonPagedPoolUsage, ULONG_MAX));
-                getCellText->Text = node->PeakNonPagedPoolText->sr;
+                {
+                    PhMoveReference(&node->PeakNonPagedPoolText, PhFormatSize(processItem->VmCounters.QuotaPeakNonPagedPoolUsage, ULONG_MAX));
+                    getCellText->Text = node->PeakNonPagedPoolText->sr;
+                }
                 break;
             case PHPRTLC_MINIMUMWORKINGSET:
                 {
@@ -3467,103 +3525,119 @@ BOOLEAN NTAPI PhpProcessTreeNewCallback(
                 }
                 break;
             case PHPRTLC_SUBSYSTEM:
-                PhpUpdateProcessNodeImage(node);
-
-                switch (node->ImageSubsystem)
                 {
-                case 0:
-                    break;
-                case IMAGE_SUBSYSTEM_NATIVE:
-                    PhInitializeStringRef(&getCellText->Text, L"Native");
-                    break;
-                case IMAGE_SUBSYSTEM_WINDOWS_GUI:
-                    PhInitializeStringRef(&getCellText->Text, L"Windows");
-                    break;
-                case IMAGE_SUBSYSTEM_WINDOWS_CUI:
-                    PhInitializeStringRef(&getCellText->Text, L"Windows console");
-                    break;
-                case IMAGE_SUBSYSTEM_OS2_CUI:
-                    PhInitializeStringRef(&getCellText->Text, L"OS/2");
-                    break;
-                case IMAGE_SUBSYSTEM_POSIX_CUI:
-                    PhInitializeStringRef(&getCellText->Text, L"POSIX");
-                    break;
-                default:
-                    PhInitializeStringRef(&getCellText->Text, L"Unknown");
-                    break;
+                    PhpUpdateProcessNodeImage(node);
+
+                    switch (node->ImageSubsystem)
+                    {
+                    case 0:
+                        break;
+                    case IMAGE_SUBSYSTEM_NATIVE:
+                        PhInitializeStringRef(&getCellText->Text, L"Native");
+                        break;
+                    case IMAGE_SUBSYSTEM_WINDOWS_GUI:
+                        PhInitializeStringRef(&getCellText->Text, L"Windows");
+                        break;
+                    case IMAGE_SUBSYSTEM_WINDOWS_CUI:
+                        PhInitializeStringRef(&getCellText->Text, L"Windows console");
+                        break;
+                    case IMAGE_SUBSYSTEM_OS2_CUI:
+                        PhInitializeStringRef(&getCellText->Text, L"OS/2");
+                        break;
+                    case IMAGE_SUBSYSTEM_POSIX_CUI:
+                        PhInitializeStringRef(&getCellText->Text, L"POSIX");
+                        break;
+                    default:
+                        PhInitializeStringRef(&getCellText->Text, L"Unknown");
+                        break;
+                    }
                 }
                 break;
             case PHPRTLC_PACKAGENAME:
-                getCellText->Text = PhGetStringRef(processItem->PackageFullName);
+                {
+                    getCellText->Text = PhGetStringRef(processItem->PackageFullName);
+                }
                 break;
             case PHPRTLC_APPID:
-                PhpUpdateProcessNodeAppId(node);
-                getCellText->Text = PhGetStringRef(node->AppIdText);
+                {
+                    PhpUpdateProcessNodeAppId(node);
+                    getCellText->Text = PhGetStringRef(node->AppIdText);
+                }
                 break;
             case PHPRTLC_DPIAWARENESS:
-                PhpUpdateProcessNodeDpiAwareness(node);
-
-                switch (node->DpiAwareness)
                 {
-                case PH_PROCESS_DPI_AWARENESS_UNAWARE + 1:
-                    PhInitializeStringRef(&getCellText->Text, L"Unaware");
-                    break;
-                case PH_PROCESS_DPI_AWARENESS_SYSTEM_DPI_AWARE + 1:
-                    PhInitializeStringRef(&getCellText->Text, L"System aware");
-                    break;
-                case PH_PROCESS_DPI_AWARENESS_PER_MONITOR_DPI_AWARE + 1:
-                    PhInitializeStringRef(&getCellText->Text, L"Per-monitor aware");
-                    break;
-                case PH_PROCESS_DPI_AWARENESS_PER_MONITOR_AWARE_V2 + 1:
-                    PhInitializeStringRef(&getCellText->Text, L"Per-monitor V2");
-                    break;
-                case PH_PROCESS_DPI_AWARENESS_UNAWARE_GDISCALED + 1:
-                    PhInitializeStringRef(&getCellText->Text, L"Unaware (GDI scaled)");
-                    break;
+                    PhpUpdateProcessNodeDpiAwareness(node);
+
+                    switch (node->DpiAwareness)
+                    {
+                    case PH_PROCESS_DPI_AWARENESS_UNAWARE + 1:
+                        PhInitializeStringRef(&getCellText->Text, L"Unaware");
+                        break;
+                    case PH_PROCESS_DPI_AWARENESS_SYSTEM_DPI_AWARE + 1:
+                        PhInitializeStringRef(&getCellText->Text, L"System aware");
+                        break;
+                    case PH_PROCESS_DPI_AWARENESS_PER_MONITOR_DPI_AWARE + 1:
+                        PhInitializeStringRef(&getCellText->Text, L"Per-monitor aware");
+                        break;
+                    case PH_PROCESS_DPI_AWARENESS_PER_MONITOR_AWARE_V2 + 1:
+                        PhInitializeStringRef(&getCellText->Text, L"Per-monitor V2");
+                        break;
+                    case PH_PROCESS_DPI_AWARENESS_UNAWARE_GDISCALED + 1:
+                        PhInitializeStringRef(&getCellText->Text, L"Unaware (GDI scaled)");
+                        break;
+                    }
                 }
                 break;
             case PHPRTLC_CFGUARD:
-                if (processItem->IsXfgAuditEnabled)
-                    PhInitializeStringRef(&getCellText->Text, L"XF Guard (audit)");
-                else if (processItem->IsXfgEnabled)
-                    PhInitializeStringRef(&getCellText->Text, L"XF Guard");
-                else if (processItem->IsControlFlowGuardEnabled)
-                    PhInitializeStringRef(&getCellText->Text, L"CF Guard");
+                {
+                    if (processItem->IsXfgAuditEnabled)
+                        PhInitializeStringRef(&getCellText->Text, L"XF Guard (audit)");
+                    else if (processItem->IsXfgEnabled)
+                        PhInitializeStringRef(&getCellText->Text, L"XF Guard");
+                    else if (processItem->IsControlFlowGuardEnabled)
+                        PhInitializeStringRef(&getCellText->Text, L"CF Guard");
+                }
                 break;
             case PHPRTLC_TIMESTAMP:
-                PhpUpdateProcessNodeImage(node);
-
-                if (node->ImageTimeDateStamp != 0)
                 {
-                    LARGE_INTEGER time;
-                    SYSTEMTIME systemTime;
+                    PhpUpdateProcessNodeImage(node);
 
-                    PhSecondsSince1970ToTime(node->ImageTimeDateStamp, &time);
-                    PhLargeIntegerToLocalSystemTime(&systemTime, &time);
+                    if (node->ImageTimeDateStamp != 0)
+                    {
+                        LARGE_INTEGER time;
+                        SYSTEMTIME systemTime;
 
-                    PhMoveReference(&node->TimeStampText, PhFormatDateTime(&systemTime));
-                    getCellText->Text = node->TimeStampText->sr;
+                        PhSecondsSince1970ToTime(node->ImageTimeDateStamp, &time);
+                        PhLargeIntegerToLocalSystemTime(&systemTime, &time);
+
+                        PhMoveReference(&node->TimeStampText, PhFormatDateTime(&systemTime));
+                        getCellText->Text = node->TimeStampText->sr;
+                    }
                 }
                 break;
             case PHPRTLC_FILEMODIFIEDTIME:
-                PhpUpdateProcessNodeFileAttributes(node);
-
-                if (node->FileLastWriteTime.QuadPart != 0)
                 {
-                    SYSTEMTIME systemTime;
+                    PhpUpdateProcessNodeFileAttributes(node);
 
-                    PhLargeIntegerToLocalSystemTime(&systemTime, &node->FileLastWriteTime);
-                    PhMoveReference(&node->FileModifiedTimeText, PhFormatDateTime(&systemTime));
-                    getCellText->Text = node->FileModifiedTimeText->sr;
+                    if (node->FileLastWriteTime.QuadPart != 0)
+                    {
+                        SYSTEMTIME systemTime;
+
+                        PhLargeIntegerToLocalSystemTime(&systemTime, &node->FileLastWriteTime);
+                        PhMoveReference(&node->FileModifiedTimeText, PhFormatDateTime(&systemTime));
+                        getCellText->Text = node->FileModifiedTimeText->sr;
+                    }
                 }
                 break;
             case PHPRTLC_FILESIZE:
-                PhpUpdateProcessNodeFileAttributes(node);
-
-                if (node->FileEndOfFile.QuadPart != 0)
                 {
-                    PhMoveReference(&node->FileSizeText, PhFormatSize(node->FileEndOfFile.QuadPart, ULONG_MAX));
-                    getCellText->Text = node->FileSizeText->sr;
+                    PhpUpdateProcessNodeFileAttributes(node);
+
+                    if (node->FileEndOfFile.QuadPart != 0)
+                    {
+                        PhMoveReference(&node->FileSizeText, PhFormatSize(node->FileEndOfFile.QuadPart, ULONG_MAX));
+                        getCellText->Text = node->FileSizeText->sr;
+                    }
                 }
                 break;
             case PHPRTLC_SUBPROCESSCOUNT:
@@ -3646,8 +3720,12 @@ BOOLEAN NTAPI PhpProcessTreeNewCallback(
                 }
                 break;
             case PHPRTLC_CET:
-                if (processItem->IsCetEnabled)
-                    PhInitializeStringRef(&getCellText->Text, L"CET");
+                {
+                    if (processItem->IsCetEnabled)
+                        PhInitializeStringRef(&getCellText->Text, L"CET");
+                    else
+                        PhInitializeEmptyStringRef(&getCellText->Text);
+                }
                 break;
             case PHPRTLC_IMAGE_COHERENCY:
                 {
@@ -3689,7 +3767,7 @@ BOOLEAN NTAPI PhpProcessTreeNewCallback(
                         break;
                     }
 
-                    PhInitFormatF(&format[0], (DOUBLE)(processItem->ImageCoherency * 100.f), PhMaxPrecisionUnit);
+                    PhInitFormatF(&format[0], (processItem->ImageCoherency * 100.f), PhMaxPrecisionUnit);
                     PhInitFormatS(&format[1], L"%");
 
                     PhMoveReference(&node->ImageCoherencyText, PhFormat(format, RTL_NUMBER_OF(format), 0));
@@ -3965,6 +4043,41 @@ BOOLEAN NTAPI PhpProcessTreeNewCallback(
                     {
                         PhMoveReference(&node->ReferenceCountText, PhFormatUInt64(node->ReferenceCount, FALSE));
                         getCellText->Text = node->ReferenceCountText->sr;
+                    }
+                }
+                break;
+            case PHPRTLC_LXSSPID:
+                {
+                    if (processItem->LxssProcessId)
+                    {
+                        PH_FORMAT format;
+
+                        PhInitFormatU(&format, processItem->LxssProcessId);
+
+                        PhMoveReference(&node->LxssProcessIdText, PhFormat(&format, 1, 0));
+                        getCellText->Text = PhGetStringRef(node->LxssProcessIdText);
+                    }
+                    else
+                    {
+                        PhInitializeEmptyStringRef(&getCellText->Text);
+                    }
+                }
+                break;
+            case PHPRTLC_START_KEY:
+                {
+                    if (processItem->ProcessStartKey)
+                    {
+                        PH_FORMAT format[2];
+
+                        PhInitFormatS(&format[0], L"0x");
+                        PhInitFormatI64X(&format[1], processItem->ProcessStartKey);
+
+                        PhMoveReference(&node->ProcessStartKeyText, PhFormat(format, 2, 0));
+                        getCellText->Text = PhGetStringRef(node->ProcessStartKeyText);
+                    }
+                    else
+                    {
+                        PhInitializeEmptyStringRef(&getCellText->Text);
                     }
                 }
                 break;

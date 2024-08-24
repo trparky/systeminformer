@@ -664,7 +664,7 @@
 #define ID_VIEW_REFRESH                 40098
 #define ID_TOOLS_THREADSTACKS           40100
 #define ID_TOOLS_CREATESERVICE          40101
-#define ID_TOOLS_HIDDENPROCESSES        40102
+#define ID_TOOLS_ZOMBIEPROCESSES        40102
 #define ID_TOOLS_INSPECTEXECUTABLEFILE  40103
 #define ID_HELP_LOG                     40104
 #define ID_HELP_DONATE                  40105
