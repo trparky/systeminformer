@@ -426,7 +426,7 @@ INT_PTR CALLBACK PhpZombieProcessesDlgProc(
 
                             if (processItem = PhpCreateProcessItemForZombieProcess(hwndDlg, entry))
                             {
-                                SystemInformer_ShowProcessProperties(processItem);
+                                ProcessHacker_ShowProcessProperties(processItem);
                                 PhDereferenceObject(processItem);
                             }
                             else

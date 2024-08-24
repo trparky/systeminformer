@@ -157,8 +157,8 @@ static VOID PhpConvertToPArgb32IfNeeded(
 
 HBITMAP PhIconToBitmap(
     _In_ HICON Icon,
-    _In_ ULONG Width,
-    _In_ ULONG Height
+    _In_ LONG Width,
+    _In_ LONG Height
     )
 {
     HBITMAP bitmap;
@@ -240,8 +240,8 @@ HBITMAP PhIconToBitmap(
 // based on BufferedPaintSetAlpha/BufferedPaintMakeOpaque (dmex)
 VOID PhBitmapSetAlpha(
     _In_ PVOID Bits,
-    _In_ ULONG Width,
-    _In_ ULONG Height
+    _In_ LONG Width,
+    _In_ LONG Height
     )
 {
     ULONG count = Width * Height;

@@ -964,7 +964,7 @@ VOID PhpThreadProviderUpdate(
             // Is it a GUI thread?
             if (threadItem->ThreadId)
             {
-                threadItem->IsGuiThread = PhGetThreadWin32Thread(threadItem->ThreadId);
+                threadItem->IsGuiThread = PhGetThreadWin32Thread(threadItem->ThreadId, NULL);
             }
 
             if (WindowsVersion >= WINDOWS_10_22H2 && threadItem->ThreadHandle)

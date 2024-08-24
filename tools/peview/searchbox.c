@@ -14,8 +14,7 @@
 #include <vssym32.h>
 //#include <wincodec.h>
 #include <emenu.h>
-
-#include "../../tools/thirdparty/pcre/pcre2.h"
+#include <thirdparty.h>
 
 typedef struct _PV_SEARCHCONTROL_BUTTON
 {
