@@ -206,7 +206,7 @@ typedef struct _PH_PROCESS_ITEM
             ULONG IsPacked : 1;
             ULONG IsHandleValid : 1;
             ULONG IsSuspended : 1;
-            ULONG IsWow64 : 1;
+            ULONG IsWow64Process : 1;
             ULONG IsImmersive : 1;
             ULONG IsPartiallySuspended : 1;
             ULONG IsProtectedHandle : 1;

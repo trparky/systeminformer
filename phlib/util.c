@@ -8524,7 +8524,7 @@ NTSTATUS PhCreateProcessSnapshot(
     HANDLE processHandle = ProcessHandle;
     HANDLE snapshotHandle = NULL;
 
-    if (!PssCaptureSnapshot_Import())
+    if (!PssNtCaptureSnapshot_Import())
         return STATUS_PROCEDURE_NOT_FOUND;
 
     if (!ProcessHandle)
@@ -8539,17 +8539,16 @@ NTSTATUS PhCreateProcessSnapshot(
     if (!NT_SUCCESS(status))
         return status;
 
-    status = PssCaptureSnapshot_Import()(
+    status = PssNtCaptureSnapshot_Import()(
+        &snapshotHandle,
         processHandle,
         PSS_CAPTURE_VA_CLONE | PSS_CAPTURE_HANDLES | PSS_CAPTURE_HANDLE_NAME_INFORMATION |
         PSS_CAPTURE_HANDLE_BASIC_INFORMATION | PSS_CAPTURE_HANDLE_TYPE_SPECIFIC_INFORMATION |
         PSS_CAPTURE_HANDLE_TRACE | PSS_CAPTURE_THREADS | PSS_CAPTURE_THREAD_CONTEXT |
         PSS_CAPTURE_THREAD_CONTEXT_EXTENDED | PSS_CAPTURE_VA_SPACE | PSS_CAPTURE_VA_SPACE_SECTION_INFORMATION |
         PSS_CREATE_BREAKAWAY | PSS_CREATE_BREAKAWAY_OPTIONAL | PSS_CREATE_USE_VM_ALLOCATIONS,
-        CONTEXT_ALL, // WOW64_CONTEXT_ALL?
-        &snapshotHandle
+        CONTEXT_ALL // WOW64_CONTEXT_ALL?
         );
-    status = PhDosErrorToNtStatus(status);
 
     if (!ProcessHandle && processHandle)
         NtClose(processHandle);
@@ -8567,17 +8566,17 @@ VOID PhFreeProcessSnapshot(
     _In_ HANDLE ProcessHandle
     )
 {
-    if (PssQuerySnapshot_Import())
+    if (PssNtQuerySnapshot_Import())
     {
         PSS_VA_CLONE_INFORMATION processInfo = { 0 };
         PSS_HANDLE_TRACE_INFORMATION handleInfo = { 0 };
 
-        if (PssQuerySnapshot_Import()(
+        if (NT_SUCCESS(PssNtQuerySnapshot_Import()(
             SnapshotHandle,
-            PSS_QUERY_VA_CLONE_INFORMATION,
+            PSSNT_QUERY_VA_CLONE_INFORMATION,
             &processInfo,
             sizeof(PSS_VA_CLONE_INFORMATION)
-            ) == ERROR_SUCCESS)
+            )))
         {
             if (processInfo.VaCloneHandle)
             {
@@ -8585,12 +8584,12 @@ VOID PhFreeProcessSnapshot(
             }
         }
 
-        if (PssQuerySnapshot_Import()(
+        if (NT_SUCCESS(PssNtQuerySnapshot_Import()(
             SnapshotHandle,
-            PSS_QUERY_HANDLE_TRACE_INFORMATION,
+            PSSNT_QUERY_HANDLE_TRACE_INFORMATION,
             &handleInfo,
             sizeof(PSS_HANDLE_TRACE_INFORMATION)
-            ) == ERROR_SUCCESS)
+            )))
         {
             if (handleInfo.SectionHandle)
             {
@@ -8599,9 +8598,9 @@ VOID PhFreeProcessSnapshot(
         }
     }
 
-    if (PssFreeSnapshot_Import())
+    if (PssNtFreeRemoteSnapshot)
     {
-        PssFreeSnapshot_Import()(ProcessHandle, SnapshotHandle);
+        PssNtFreeRemoteSnapshot(ProcessHandle, SnapshotHandle);
     }
 }
 
